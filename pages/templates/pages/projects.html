@@ -1,0 +1,30 @@
+{% extends "pages/base.html" %}
+{% block title %}Главная — Fotter{% endblock %}
+{% block content %}
+<main class="wrap">
+    <aside class="sidebar">
+      <h3>Категории</h3>
+      <nav class="cat-list">
+        <a class="cat active" href="#">Все</a>
+        <a class="cat" href="#">Веб-разработка</a>
+        <!-- ... -->
+      </nav>
+    </aside>
+  
+    <section class="content">
+      <div class="cards1">
+        <article class="card1">
+          <h4>Заголовок проекта</h4>
+          <p>Краткое описание…</p>
+          <div class="meta">
+            <div><span>Бюджет</span><b>50 000 ₽</b></div>
+            <div><span>Срок</span><b>14 дней</b></div>
+          </div>
+          <button class="btn">Откликнуться</button>
+        </article>
+        <!-- ещё .card -->
+      </div>
+    </section>
+  </main>
+
+  {% endblock %}

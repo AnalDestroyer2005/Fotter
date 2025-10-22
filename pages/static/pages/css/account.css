@@ -1,0 +1,160 @@
+/* -------------------------------------------------------
+   БАЗА
+------------------------------------------------------- */
+:root {
+    --bg: #0b0d12;
+    --panel: #111622;
+    --text: #f5f7fb;
+    --muted: #8fa0cc;
+    --label: #aab7e8;
+    --chip: #1a2235;
+    --chip-border: #223056;
+    --primary: #3b82f6;
+    --danger: #ef4444;
+    --tab: #1a2235;
+    --tab-active: #273459;
+    --tab-border: #223056;
+    --tab-active-border: #3a58a8;
+    --shadow: 0 8px 24px rgba(0,0,0,.4);
+    --radius: 16px;
+    --radius-sm: 10px;
+    --gap-sm: 8px;
+    --gap-md: 12px;
+    --gap-lg: 16px;
+  }
+  
+  * { box-sizing: border-box; }
+  html, body { height: 100%; }
+  body {
+    margin: 0;
+    font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    line-height: 1.45;
+  }
+  
+  /* -------------------------------------------------------
+     КОНТЕЙНЕР
+  ------------------------------------------------------- */
+  .wrap {
+    max-width: 860px;
+    margin: 40px auto;
+    padding: 24px;
+    background: var(--panel);
+    border-radius: var(--radius);
+    box-shadow: var(--shadow);
+  }
+  
+  h1 {
+    margin: 0 0 var(--gap-lg);
+    font-size: 22px;
+    color: #c9d4ff;
+    font-weight: 600;
+  }
+  
+  /* -------------------------------------------------------
+     ТАБЫ
+  ------------------------------------------------------- */
+  .tabs {
+    display: flex;
+    gap: var(--gap-sm);
+    margin-bottom: var(--gap-lg);
+  }
+  
+  .tab {
+    appearance: none;
+    border: 1px solid var(--tab-border);
+    background: var(--tab);
+    color: var(--text);
+    padding: 10px 14px;
+    border-radius: var(--radius-sm);
+    cursor: pointer;
+  }
+  .tab.active {
+    background: var(--tab-active);
+    border-color: var(--tab-active-border);
+    color: #dce6ff;
+  }
+  
+  /* -------------------------------------------------------
+     ПАНЕЛИ
+  ------------------------------------------------------- */
+  .panel { display: none; }
+  .panel.active { display: block; }
+  
+  /* -------------------------------------------------------
+     ФОРМА / ПОЛЯ
+  ------------------------------------------------------- */
+  .field { display: flex; flex-direction: column; gap: 6px; }
+  .label { font-size: 13px; color: var(--label); }
+  
+  input, textarea, select, button {
+    font: inherit;
+  }
+  input, textarea, select {
+    width: 100%;
+    padding: 10px 12px;
+    background: #0e1422;
+    color: var(--text);
+    border: 1px solid var(--chip-border);
+    border-radius: var(--radius-sm);
+    outline: none;
+  }
+  textarea { min-height: 90px; resize: vertical; }
+  
+  button {
+    background: var(--primary);
+    color: #fff;
+    border: none;
+    padding: 10px 14px;
+    border-radius: var(--radius-sm);
+    cursor: pointer;
+  }
+  .btn-danger { background: var(--danger); }
+  
+  /* -------------------------------------------------------
+     ЛЕЙАУТ НА FLEX
+  ------------------------------------------------------- */
+  .stack { display: flex; flex-direction: column; gap: var(--gap-md); }
+  
+  .row {
+    display: flex;
+    align-items: center;
+    gap: var(--gap-sm);
+    flex-wrap: wrap;
+  }
+  
+  .space-between { justify-content: space-between; }
+  .gap-md { gap: var(--gap-md); }
+  
+  /* 2 колонки на flex (адаптив) */
+  .split-2 {
+    display: flex;
+    gap: var(--gap-md);
+    flex-wrap: wrap;
+  }
+  .split-2 > .field {
+    flex: 1 1 260px; /* тянется, но не уже 260px */
+  }
+  
+  /* -------------------------------------------------------
+     МЕЛОЧИ
+  ------------------------------------------------------- */
+  .muted { color: var(--muted); font-size: 12px; }
+  .ok { color: #83f7b1; font-size: 13px; }
+  .error { color: #ff9b9b; font-size: 13px; white-space: pre-wrap; }
+  
+  .chip {
+    padding: 6px 10px;
+    border-radius: 999px;
+    background: var(--chip);
+    border: 1px solid var(--chip-border);
+    font-size: 12px;
+  }
+  
+  .skills {
+    display: flex;
+    gap: var(--gap-sm);
+    flex-wrap: wrap;
+  }
+  

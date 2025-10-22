@@ -1,0 +1,387 @@
+/* === СБРОС И БАЗА === */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: 'Montserrat', sans-serif;
+  }
+  
+  body {
+    background: #eee;
+    overflow-x: hidden; /* убираем горизонтальный скролл */
+  }
+  
+  /* === ХЕДЕР === */
+  header {
+    width: 100%;
+    height: 80px;
+    padding: 0 2% 0 1%;
+    background: #fff;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    display: flex;
+    justify-content: space-between;
+    align-items: center; /* выравнивание по вертикали */
+    box-shadow: 0 2px 10px rgba(0,0,0,0.15);
+  }
+  
+  /* Левая часть (логотип + текст) */
+  #fotter {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  #logo{
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    text-decoration: none;
+   
+  }
+  #logo img {
+    width: 70px;
+    height: 70px;
+    display: block;
+  }
+  
+  #log {
+    font-weight: 700;
+    font-size: 20px;
+    line-height: 1;
+    color: #000;
+  }
+  
+  /* Навигация */
+  #header-buttons {
+    display: flex;
+    align-items: center;
+    gap: 32px;
+  }
+  
+  .header-button {
+    color: #2d2d2d;
+    font-weight: 400;
+    text-decoration: none;
+    font-size: 16px;
+    transition: 0.3s;
+  }
+  
+  .header-button:hover {
+    color: #000;
+    text-decoration: underline;
+  }
+  
+  /* Правый блок (Войти / Регистрация) */
+  #header-reg {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+  
+  #auth, #reg {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    height: 40px;
+    padding: 0 20px;
+    border: 1px solid #000;
+    border-radius: 8px;
+    font-size: 15px;
+    cursor: pointer;
+    transition: 0.3s;
+    font-weight: 500;
+    text-decoration: none;
+  }
+  
+  /* Кнопка Войти */
+  #auth {
+    background: #fff;
+    color: #000;
+  }
+  
+  #auth:hover {
+    background: #2d2d2d;
+    color: #fff;
+  }
+  
+  /* Кнопка Регистрация */
+  #reg {
+    background: #2d2d2d;
+    color: #fff;
+  }
+  
+  #reg:hover {
+    background: #fff;
+    color: #000;
+  }
+  
+  /* === ОСНОВНОЙ КОНТЕНТ === */
+  main {
+    width: 92%;
+    margin: 0 auto;
+    padding-top: 40px;
+  }
+  
+  .main-base {
+    display: flex;
+    gap: 24px;
+    align-items: flex-start;
+    justify-content: space-between;
+  }
+  
+  #main-base-left {
+    flex: 0 1 60%; /* левая колонка */
+    min-width: 0;
+  }
+  
+  #it-otter {
+    flex: 0 1 40%; /* правая колонка */
+    max-width: 40%;
+    width: 100%;
+    height: auto;
+    display: block;
+    object-fit: contain;
+  }
+  
+  /* === ПОИСК === */
+  .search-box {
+    display: flex;
+    width: 100%;
+    max-width: 500px;
+    background: #fff;
+    border: 1px solid #e0e0e0;
+    border-radius: 8px;
+    overflow: hidden;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.08);
+    margin: 35px 0;
+  }
+  
+  .search-input {
+    flex: 1;
+    border: none;
+    padding: 12px 16px;
+    font-size: 15px;
+  }
+  
+  .search-input:focus {
+    outline: none;
+  }
+  
+  .search-button {
+    background: #2d2d2d;
+    color: #fff;
+    font-weight: 600;
+    border: none;
+    padding: 0 20px;
+    cursor: pointer;
+    transition: background 0.2s;
+  }
+  
+  .search-button:hover {
+    background: #444;
+  }
+  
+  /* === КАРТОЧКИ === */
+  #cards {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 16px;
+    width: 100%;
+    margin-bottom: 40px;
+  }
+  
+  .card {
+    width: 160px;
+    padding: 16px;
+    background: #fff;
+    border: 1px solid #e0e0e0;
+    border-radius: 12px;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.08);
+    text-align: center;
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+  }
+  
+  .card:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 4px 12px rgba(0,0,0,0.12);
+  }
+  
+  .avatar {
+    width: 64px;
+    height: 64px;
+    border-radius: 50%;
+    margin-bottom: 12px;
+  }
+  
+  .card-title {
+    font-size: 16px;
+    font-weight: 600;
+    color: #111;
+  }
+  
+  .card-sub {
+    font-size: 14px;
+    color: #666;
+    margin-top: 4px;
+  }
+  
+  #base-text {
+    width: 80%;
+    margin-bottom: 40px;
+    color: #222;
+    line-height: 1.6;
+    font-size: 15px;
+  }
+  
+  footer {
+    background: #2d2d2d;
+    color: #fff;
+    padding: 20px 40px;
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    flex-wrap: wrap;
+    font-size: 15px;
+    line-height: 1.6;
+    padding-left: 4%;
+    padding-right: 4%;
+  }
+  
+  .footer-column {
+    
+  }
+  
+  .footer-column strong {
+    display: block;
+    margin-bottom: 8px;
+    font-weight: 600;
+  }
+  
+
+  
+
+
+
+
+
+
+
+
+/* БАЗА */
+* { box-sizing: border-box; }
+body {
+  margin: 0;
+  font: 16px/1.5 system-ui, Arial, sans-serif;
+  background: #f4f4f5;
+  color: #222;
+}
+
+/* ОБВЁРТКА: слева сайдбар, справа контент */
+.wrap {
+  max-width: 1400px;
+  margin: 30px auto;
+  padding: 0 40px;
+  display: flex;           /* две колонки */
+  gap: 32px;               /* расстояние между колонками */
+  align-items: flex-start;
+}
+
+/* САЙДБАР */
+.sidebar {
+  width: 240px;            /* фиксированная ширина сайдбара */
+  background: #fff;
+  border: 1px solid #e6e6e8;
+  border-radius: 14px;
+  padding: 20px;
+  position: sticky;        /* прилипает при скролле */
+  top: 16px;
+}
+.sidebar h3 { margin: 0 0 16px; font-size: 18px; }
+.cat-list { display: flex; flex-direction: column; gap: 10px; }
+.cat {
+  display: block;
+  padding: 10px 14px;
+  border-radius: 10px;
+  text-decoration: none;
+  color: #2d2d2d;
+}
+.cat:hover { background: #f6f6f6; }
+.cat.active { background: #ededed; font-weight: 600; }
+
+/* КОНТЕНТ (справа) */
+.content {
+  flex: 1;                 /* берёт всё оставшееся место */
+  min-width: 0;            /* чтобы не выталкивать вбок */
+}
+
+/* СПИСОК КАРТОЧЕК: ряд + переносы */
+.cards1 {
+  display: flex;           /* вместо grid */
+  flex-wrap: wrap;         /* перенос на новую строку */
+  gap: 24px;               /* расстояние между карточками */
+}
+
+/* КАРТОЧКА ПРОЕКТА
+   flex-basis задаёт «целевую» ширину.
+   Здесь ~3 колонки при широкой ширине. */
+.card1 {
+  flex: 1 1 340px;         /* grow=1, shrink=1, базовая ширина=340px */
+  max-width: 420px;        /* чтобы не растягивались слишком широко */
+  background: #fff;
+  border: 1px solid #e7e7ea;
+  border-radius: 14px;
+  padding: 20px;
+  display: flex;
+  flex-direction: column;  /* заголовок, текст, мета, кнопка — вертикально */
+  gap: 12px;
+  box-shadow: 0 4px 10px rgba(0,0,0,0.05);
+}
+
+.card h4 { margin: 0; font-size: 18px; font-weight: 700; }
+.card p  { margin: 0; color: #555; }
+
+/* Мета: бюджет/срок — две колонки с равными отступами */
+.meta {
+  display: flex;
+  justify-content: space-between;
+  gap: 24px;
+  font-size: 14px;
+}
+.meta span { display: block; color: #888; font-size: 13px; }
+.meta b    { display: block; margin-top: 4px; }
+
+/* КНОПКА */
+.btn {
+  margin-top: auto;        /* прижать кнопку вниз в карточке */
+  height: 40px;
+  border: 0;
+  border-radius: 10px;
+  background: #222;
+  color: #fff;
+  font-weight: 600;
+  cursor: pointer;
+}
+.btn:hover { background: #444; }
+
+/* АДАПТИВ — узкие экраны */
+@media (max-width: 1000px) {
+  .wrap {
+    flex-direction: column;     /* сайдбар сверху, контент ниже */
+    padding: 0 20px;
+  }
+  .sidebar {
+    position: static;
+    width: 100%;
+  }
+  .card {
+    flex-basis: 300px;          /* карточки немного уже на планшете */
+  }
+}
+
+@media (max-width: 560px) {
+  .card {
+    flex-basis: 100%;           /* одна карточка в ряд на телефоне */
+    max-width: 100%;
+  }
+}

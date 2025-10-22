@@ -1,0 +1,53 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700&display=swap" rel="stylesheet">
+
+    <title>{% block title %}Fotter{% endblock %}</title>
+    <link rel="stylesheet" href="{% static 'pages/css/style.css' %}">
+</head>
+
+<body>
+    <header> 
+        <div id="fotter">
+            <a href="/" id="logo">
+                <img src="{% static 'pages/img/logo.png' %}" alt="Логотип">
+                <span id="log">FOTTER</span>
+            </a>
+        </div>
+
+        <div id="header-buttons">
+            <a href="/projects/" class="header-button">Проекты</a>
+            <a href="#" class="header-button">Исполнители</a>
+            <a href="#" class="header-button">FAQ</a>
+        </div>
+        
+        <div id="header-reg">
+            <a href="#" id="auth" class="header-button">Войти</a>
+            <a href="#" id="reg" class="header-button">Регистрация</a>
+        </div>  
+    </header>
+    
+    <main>
+        {% block content %}{% endblock %}
+    </main>
+
+    <footer>
+        <div class="footer-column">
+            <strong>Навигация:</strong>
+            <div>Главная</div>
+            <div>О нас</div>
+            <div>Помощь</div>
+        </div>
+      
+        <div class="footer-column">
+            <strong>Контакты:</strong>
+            <div>Telegram</div>
+            <div>Gmail</div>
+        </div>
+    </footer>
+</body>
+</html>

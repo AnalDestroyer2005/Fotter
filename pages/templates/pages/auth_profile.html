@@ -1,0 +1,95 @@
+{% load static %}
+<!doctype html>
+<html lang="ru">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Аккаунт — Регистрация / Логин / Профиль</title>
+  <link rel="stylesheet" href="{% static 'pages/css/account.css' %}">
+</head>
+<body>
+  <div class="wrap">
+    <h1>Аккаунт</h1>
+    <div class="tabs">
+      <div class="tab active" data-tab="register">Регистрация</div>
+      <div class="tab" data-tab="login">Логин</div>
+      <div class="tab" data-tab="profile">Профиль</div>
+    </div>
+
+    <!-- Регистрация -->
+    <div class="panel active" id="panel-register">
+      <div class="grid">
+        <label>Имя пользователя
+          <input id="reg-username" placeholder="username" />
+        </label>
+        <label>Email
+          <input id="reg-email" placeholder="you@example.com" />
+        </label>
+        <label>Пароль
+          <input id="reg-password" type="password" placeholder="••••••••" />
+        </label>
+        <div class="row">
+          <button id="btn-register">Создать аккаунт</button>
+          <div id="reg-msg" class="muted"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Логин -->
+    <div class="panel" id="panel-login">
+      <div class="grid">
+        <label>Логин или Email
+          <input id="login-username" placeholder="username или email" />
+        </label>
+        <label>Пароль
+          <input id="login-password" type="password" placeholder="••••••••" />
+        </label>
+        <div class="row">
+          <button id="btn-login">Войти</button>
+          <div class="muted">Токен хранится в LocalStorage.</div>
+          <div class="row"><span class="chip" id="whoami">не авторизован</span></div>
+        </div>
+        <div class="row">
+          <button id="btn-logout" class="btn-danger">Выйти</button>
+          <div id="login-msg" class="muted"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Профиль -->
+    <div class="panel" id="panel-profile">
+      <div class="grid">
+        <div class="grid grid-2">
+          <label>Имя
+            <input id="me-first" />
+          </label>
+          <label>Фамилия
+            <input id="me-last" />
+          </label>
+        </div>
+        <label>О себе
+          <textarea id="me-bio" maxlength="500" placeholder="кратко о себе..."></textarea>
+        </label>
+
+        <div>
+          <div class="row space-between">
+            <label>Навыки (id через запятую: 1,2)</label>
+            <button id="btn-load-skills" type="button">Загрузить навыки</button>
+          </div>
+          <input id="me-skill-ids" placeholder="например: 1,2,3" />
+          <div class="skills" id="skills-list"></div>
+        </div>
+
+        <div class="row">
+          <button id="btn-load-me">Обновить из сервера</button>
+          <button id="btn-save-me">Сохранить профиль</button>
+          <div id="me-msg" class="muted"></div>
+        </div>
+        <div id="me-error" class="error"></div>
+      </div>
+    </div>
+  </div>
+
+  <script src="{% static 'pages/js/account.js' %}"></script>
+</body>
+</html>

@@ -1,0 +1,71 @@
+{% extends "pages/base.html" %}
+{% load static %}
+{% block title %}Главная — Fotter{% endblock %}
+{% block content %}
+
+<main>
+    <div class="main-base">
+        <div id="main-base-left">
+            <div id="search">
+                <h1>Найди свой проект или исполнителя</h1>
+                
+                <form class="search-box">
+                    <input type="text" class="search-input" placeholder="Например: Django, React">
+                    <button type="submit" class="search-button">Найти</button>
+                  </form>
+                </form>
+            </div>
+
+            <div  id="cards">
+                <div class="card">
+                    <img src="https://i.pravatar.cc/96?img=12" alt="Анна Иванова" class="avatar">
+                    <h3 class="card-title">Анна Иванова</h3>
+                    <p class="card-sub">Веб-разработка</p>
+                  </div>
+                <div class="card">
+                    <img src="https://i.pravatar.cc/96?img=12" alt="Анна Иванова" class="avatar">
+                    <h3 class="card-title">Анна Иванова</h3>
+                    <p class="card-sub">Веб-разработка</p>
+                  </div>
+                <div class="card">
+                    <img src="https://i.pravatar.cc/96?img=12" alt="Анна Иванова" class="avatar">
+                    <h3 class="card-title">Анна Иванова</h3>
+                    <p class="card-sub">Веб-разработка</p>
+                  </div>
+                <div class="card">
+                    <img src="https://i.pravatar.cc/96?img=12" alt="Анна Иванова" class="avatar">
+                    <h3 class="card-title">Анна Иванова</h3>
+                    <p class="card-sub">Веб-разработка</p>
+                  </div>
+                <div class="card">
+                    <img src="https://i.pravatar.cc/96?img=12" alt="Анна Иванова" class="avatar">
+                    <h3 class="card-title">Анна Иванова</h3>
+                    <p class="card-sub">Веб-разработка</p>
+                  </div>
+                <div class="card">
+                    <img src="https://i.pravatar.cc/96?img=12" alt="Анна Иванова" class="avatar">
+                    <h3 class="card-title">Анна Иванова</h3>
+                    <p class="card-sub">Веб-разработка</p>
+                  </div>
+            </div>
+            <div id="base-text">Fotter — это онлайн-платформа, которая соединяет заказчиков и исполнителей для выполнения проектов.
+                Заказчики могут публиковать задачи, указывать бюджет и требования, а фрилансеры — откликаться, предлагать свои услуги и стоимость работы.</div>
+              
+        </div>
+        <img id="it-otter" src="{% static 'pages/img/bigotter.svg' %}" alt="">
+      </div>
+    
+    
+
+    
+
+
+  </main>
+
+
+
+
+
+{% endblock %}
+
+

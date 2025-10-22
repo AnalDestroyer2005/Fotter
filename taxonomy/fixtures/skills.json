@@ -1,0 +1,8 @@
+[
+    {"model": "taxonomy.skill", "pk": 1, "fields": {"name": "Python", "slug": "python"}},
+    {"model": "taxonomy.skill", "pk": 2, "fields": {"name": "Django", "slug": "django"}},
+    {"model": "taxonomy.skill", "pk": 3, "fields": {"name": "React", "slug": "react"}},
+    {"model": "taxonomy.skill", "pk": 4, "fields": {"name": "HTML", "slug": "html"}},
+    {"model": "taxonomy.skill", "pk": 5, "fields": {"name": "CSS", "slug": "css"}}
+  ]
+  
