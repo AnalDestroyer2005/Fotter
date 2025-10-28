@@ -2,52 +2,77 @@
 <!DOCTYPE html>
 <html lang="ru">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700&display=swap" rel="stylesheet">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>{% block title %}Fotter{% endblock %}</title>
 
-    <title>{% block title %}Fotter{% endblock %}</title>
-    <link rel="stylesheet" href="{% static 'pages/css/style.css' %}">
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="{% static 'pages/css/style.css' %}">
 </head>
 
 <body>
-    <header> 
-        <div id="fotter">
-            <a href="/" id="logo">
-                <img src="{% static 'pages/img/logo.png' %}" alt="Логотип">
-                <span id="log">FOTTER</span>
-            </a>
-        </div>
+  <!-- ===== HEADER ===== -->
+  <header>
+    <!-- Лого -->
+    <div id="fotter">
+      <a href="/" id="logo">
+        <img src="{% static 'pages/img/logo.png' %}" alt="Логотип">
+        <span id="log">FOTTER</span>
+      </a>
+    </div>
 
-        <div id="header-buttons">
-            <a href="/projects/" class="header-button">Проекты</a>
-            <a href="#" class="header-button">Исполнители</a>
-            <a href="#" class="header-button">FAQ</a>
-        </div>
-        
-        <div id="header-reg">
-            <a href="#" id="auth" class="header-button">Войти</a>
-            <a href="#" id="reg" class="header-button">Регистрация</a>
-        </div>  
-    </header>
-    
-    <main>
-        {% block content %}{% endblock %}
-    </main>
+    <!-- Навигация -->
+    <nav id="header-buttons">
+      <a href="/projects/" class="header-button">Проекты</a>
+      <a href="#" class="header-button">Исполнители</a>
+      <a href="#" class="header-button">FAQ</a>
+    </nav>
 
-    <footer>
-        <div class="footer-column">
-            <strong>Навигация:</strong>
-            <div>Главная</div>
-            <div>О нас</div>
-            <div>Помощь</div>
-        </div>
-      
-        <div class="footer-column">
-            <strong>Контакты:</strong>
-            <div>Telegram</div>
-            <div>Gmail</div>
-        </div>
-    </footer>
+    <!-- Авторизация -->
+    <!-- Гость -->
+    <div id="auth-guest" class="auth-side">
+      <a href="/auth/login/" class="header-button btn-ghost">Войти</a>
+      <a href="/auth/register/" class="header-button btn-primary">Регистрация</a>
+    </div>
+
+    <!-- Пользователь -->
+    <div id="auth-user" class="auth-side hidden">
+      <button id="user-trigger" class="user-trigger" aria-haspopup="menu" aria-expanded="false">
+        <img id="user-avatar" class="user-avatar" alt="avatar">
+        <span id="user-name" class="user-name"></span>
+        <svg class="chev" viewBox="0 0 24 24" aria-hidden="true">
+          <path d="M7 10l5 5 5-5" fill="none" stroke="currentColor" stroke-width="2"/>
+        </svg>
+      </button>
+      <div id="user-menu" class="menu" role="menu">
+        <a href="/account/" class="menu-item" role="menuitem">Мой профиль</a>
+        <a href="/settings/" class="menu-item" role="menuitem">Настройки</a>
+        <button id="logout" class="menu-item danger" role="menuitem">Выйти</button>
+      </div>
+    </div>
+  </header>
+
+  <!-- ===== MAIN ===== -->
+  <main>
+    {% block content %}{% endblock %}
+  </main>
+
+  <!-- ===== FOOTER ===== -->
+  <footer>
+    <div class="footer-column">
+      <strong>Навигация:</strong>
+      <div>Главная</div>
+      <div>О нас</div>
+      <div>Помощь</div>
+    </div>
+    <div class="footer-column">
+      <strong>Контакты:</strong>
+      <div>Telegram</div>
+      <div>Gmail</div>
+    </div>
+  </footer>
+
+  <!-- ===== JS ===== -->
+  <script src="{% static 'pages/js/header_auth.js' %}"></script>
 </body>
 </html>

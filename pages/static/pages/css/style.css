@@ -248,9 +248,7 @@
     padding-right: 4%;
   }
   
-  .footer-column {
-    
-  }
+
   
   .footer-column strong {
     display: block;
@@ -385,3 +383,128 @@ body {
     max-width: 100%;
   }
 }
+
+/* === AUTH в шапке ================================================= */
+.auth-side { display:flex; align-items:center; gap:12px; }
+.hidden { display:none !important; }
+
+.btn-primary {
+  background: #2d2d2d; color:#fff; border:1px solid #2d2d2d;
+  border-radius: 8px; padding: 8px 16px; cursor: pointer;
+}
+.btn-primary:hover { background:#000; border-color:#000; }
+.btn-ghost {
+  background:#fff; color:#000; border:1px solid #000;
+  border-radius: 8px; padding:8px 16px; cursor:pointer;
+}
+.btn-ghost:hover { background:#2d2d2d; color:#fff; }
+
+/* === Аватар и дропдаун =========================================== */
+.user-trigger{
+  display:flex; align-items:center; gap:10px;
+  background:#f5f6f8; border:1px solid #e2e6ee;
+  border-radius:999px; padding:6px 10px; cursor:pointer;
+}
+.user-avatar{ width:32px; height:32px; border-radius:50%; object-fit:cover; background:#cfd6e6; }
+.user-name{ font-size:14px; color:#394255; }
+.chev{ width:18px; height:18px; color:#677086; }
+
+/* меню пользователя (позиционируем от правого края хедера) */
+header { position: sticky; top:0; z-index:100; }
+.menu{
+  position:absolute; right:20px; top:80px; /* твой header=80px */
+  display:none; min-width:200px;
+  background:#fff; border:1px solid #e0e0e0; border-radius:12px;
+  box-shadow:0 8px 24px rgba(0,0,0,.12); padding:8px;
+}
+.menu.open{ display:block; }
+.menu-item{
+  display:block; width:100%; padding:10px 12px; border-radius:10px;
+  color:#1f2328; text-decoration:none; background:transparent; border:0; text-align:left; cursor:pointer;
+}
+.menu-item:hover{ background:#f6f7f9; }
+.menu-item.danger{ color:#e53935; }
+
+/* === Модалки ====================================================== */
+.modal{ position:fixed; inset:0; display:none; }
+.modal.show{ display:block; }
+.modal__backdrop{ position:absolute; inset:0; background:rgba(0,0,0,.45); }
+.modal__panel{
+  position:relative; max-width:440px; margin:10vh auto; background:#fff;
+  border:1px solid #e0e0e0; border-radius:16px; box-shadow:0 10px 30px rgba(0,0,0,.15);
+  padding:20px;
+}
+.modal__title{ margin:0 0 12px; font-size:20px; }
+
+.form{ display:flex; flex-direction:column; gap:12px; }
+.field{ display:flex; flex-direction:column; gap:6px; }
+.label{ font-size:13px; color:#5b6476; }
+.row{ display:flex; align-items:center; gap:10px; flex-wrap:wrap; }
+
+.btn{ height:40px; border-radius:8px; padding:0 16px; border:1px solid #000; background:#2d2d2d; color:#fff; cursor:pointer; }
+.btn:hover{ background:#000; }
+.btn-ghost{ border:1px solid #000; background:#fff; color:#000; }
+.btn-ghost:hover{ background:#2d2d2d; color:#fff; }
+
+.hint{ font-size:13px; color:#6b7280; }
+.hint.ok{ color:#24a065; }
+.hint.err{ color:#e53935; }
+
+
+.auth-wrap{
+  width: 92%;
+  margin: 40px auto 60px;
+  display: flex;
+  justify-content: center;
+}
+
+/* карточка формы */
+.auth-card{
+  width: 100%;
+  max-width: 520px;
+  background: var(--panel);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+  padding: 22px;
+}
+.auth-card h1{
+  margin: 0 0 14px;
+  font-size: 22px;
+  font-weight: 700;
+  color: var(--text);
+}
+
+/* форма */
+.stack{ display:flex; flex-direction:column; gap:12px; }
+.field{ display:flex; flex-direction:column; gap:6px; }
+.label{ font-size:13px; color: var(--muted); }
+input{
+  padding: 10px 12px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius-sm);
+  font: inherit;
+  outline: none;
+  background: #fff;
+}
+.row{ display:flex; align-items:center; gap:10px; flex-wrap:wrap; }
+.space-between{ justify-content: space-between; }
+
+.btn{
+  height: 40px;
+  padding: 0 16px;
+  border-radius: 10px;
+  border: 1px solid #000;
+  background: var(--primary);
+  color: #fff;
+  font-weight: 600;
+  cursor: pointer;
+}
+.btn:hover{ filter: brightness(.93); }
+
+.hint{ font-size: 13px; color: var(--muted); }
+.hint.ok{ color:#1e9b61; }
+.hint.err{ color:#d33; }
+
+.muted{ color: var(--muted); text-decoration: none; }
+.muted:hover{ text-decoration: underline; }

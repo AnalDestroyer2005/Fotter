@@ -5,6 +5,8 @@ from django.conf.urls.static import static
 from pages.views import home, projects, account_hub
 from accounts.api_views import RegisterView, LoginView, RefreshView, MeView
 from drf_spectacular.views import SpectacularAPIView, SpectacularSwaggerView
+from pages.views import auth_login_page, auth_register_page
+
 
 
 urlpatterns = [
@@ -14,10 +16,12 @@ urlpatterns = [
     path("api/", include("taxonomy.api_urls")),
 
     # API аутентификации (Итерация 1)
-    path("api/register/", RegisterView.as_view(), name="register"),
-    path("api/login/", LoginView.as_view(), name="login"),
+    # path("api/register/", RegisterView.as_view(), name="register"),
+    # path("api/login/", LoginView.as_view(), name="login"),
     path("api/refresh/", RefreshView.as_view(), name="token_refresh"),
     path("api/me/", MeView.as_view(), name="me"),
+    path("auth/login/", auth_login_page, name="auth_login"),
+    path("auth/register/", auth_register_page, name="auth_register"),
 
     # обычные страницы
     path("", home, name="home"),

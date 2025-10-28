@@ -1,0 +1,32 @@
+{% load static %}
+{% extends "base.html" %}
+
+{% block title %}Вход — Fotter{% endblock %}
+
+{% block content %}
+<link rel="stylesheet" href="{% static 'pages/css/auth.css' %}">
+<div class="auth-wrap">
+  <div class="auth-card">
+    <h1>Вход</h1>
+    <form id="form-login" class="stack">
+      <label class="field">
+        <span class="label">Логин или Email</span>
+        <input id="login-username" autocomplete="username" required>
+      </label>
+      <label class="field">
+        <span class="label">Пароль</span>
+        <input id="login-password" type="password" autocomplete="current-password" required>
+      </label>
+
+      <div class="row space-between">
+        <button type="submit" class="btn btn-primary">Войти</button>
+        <a class="muted" href="/auth/register/">Нет аккаунта? Регистрация</a>
+      </div>
+
+      <div id="login-hint" class="hint"></div>
+    </form>
+  </div>
+</div>
+
+<script src="{% static 'pages/js/auth_pages.js' %}"></script>
+{% endblock %}
