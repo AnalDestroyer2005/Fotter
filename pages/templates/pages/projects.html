@@ -1,30 +1,28 @@
 {% extends "pages/base.html" %}
+{% load static %}
 {% block title %}Главная — Fotter{% endblock %}
+
 {% block content %}
 <main class="wrap">
-    <aside class="sidebar">
-      <h3>Категории</h3>
-      <nav class="cat-list">
-        <a class="cat active" href="#">Все</a>
-        <a class="cat" href="#">Веб-разработка</a>
-        <!-- ... -->
-      </nav>
-    </aside>
-  
-    <section class="content">
-      <div class="cards1">
-        <article class="card1">
-          <h4>Заголовок проекта</h4>
-          <p>Краткое описание…</p>
-          <div class="meta">
-            <div><span>Бюджет</span><b>50 000 ₽</b></div>
-            <div><span>Срок</span><b>14 дней</b></div>
-          </div>
-          <button class="btn">Откликнуться</button>
-        </article>
-        <!-- ещё .card -->
-      </div>
-    </section>
-  </main>
+  <aside class="sidebar">
+    <h3>Категории</h3>
+    <nav id="cat-list" class="cat-list">
+      <!-- Категории подставятся из /api/categories/ -->
+      <a class="cat active" href="#" data-id="">Все</a>
+    </nav>
+  </aside>
 
-  {% endblock %}
+  <section class="content">
+    <div id="spinner" style="display:none">Загрузка…</div>
+    <div id="error" class="error" style="display:none"></div>
+
+    <!-- сетка карточек: под твои классы cards1/card1 -->
+    <div id="projects-grid" class="cards1"></div>
+
+    <div id="pagination" class="pager"></div>
+  </section>
+</main>
+
+<!-- Скрипт подгрузки проектов/категорий -->
+<script defer src="{% static 'pages/js/projects.js' %}"></script>
+{% endblock %}

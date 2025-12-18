@@ -1,95 +1,261 @@
+{% extends "pages/base.html" %}
 {% load static %}
-<!doctype html>
-<html lang="ru">
-<head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>Аккаунт — Регистрация / Логин / Профиль</title>
+{% block title %}Аккаунт — FOTTER{% endblock %}
+
+{% block extra_head %}
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/remixicon/4.6.0/remixicon.min.css" rel="stylesheet">
   <link rel="stylesheet" href="{% static 'pages/css/account.css' %}">
-</head>
-<body>
-  <div class="wrap">
-    <h1>Аккаунт</h1>
-    <div class="tabs">
-      <div class="tab active" data-tab="register">Регистрация</div>
-      <div class="tab" data-tab="login">Логин</div>
-      <div class="tab" data-tab="profile">Профиль</div>
-    </div>
+  <script defer src="{% static 'pages/js/account.js' %}"></script>
+{% endblock %}
 
-    <!-- Регистрация -->
-    <div class="panel active" id="panel-register">
-      <div class="grid">
-        <label>Имя пользователя
-          <input id="reg-username" placeholder="username" />
-        </label>
-        <label>Email
-          <input id="reg-email" placeholder="you@example.com" />
-        </label>
-        <label>Пароль
-          <input id="reg-password" type="password" placeholder="••••••••" />
-        </label>
-        <div class="row">
-          <button id="btn-register">Создать аккаунт</button>
-          <div id="reg-msg" class="muted"></div>
+{% block content %}
+  <!-- Основной контейнер страницы аккаунта -->
+  <div class="main-container account" data-username="{{ request.user.username|default:'' }}">
+
+    <!-- ЛЕВАЯ КОЛОНКА -->
+    <aside class="left-col">
+      <div class="profile-card">
+        <div id="accAvatar" class="profile-avatar-large"></div>
+        <h2 id="accName" class="profile-name">—</h2>
+
+        <div class="verification-badge">
+          <i class="ri-verified-badge-fill"></i>
+          <span id="accVerifyText">Личность не подтверждена</span>
+        </div>
+
+        <div class="info-list">
+          <div class="info-item">
+            <i class="ri-calendar-line"></i>
+            <span id="accJoined">На FOTTER с —</span>
+          </div>
+          <div class="info-item">
+            <i class="ri-checkbox-circle-line"></i>
+            <span id="accOnline" class="online-status">Оффлайн</span>
+          </div>
+        </div>
+
+        <div class="awards-section">
+          <div class="award-icon" title="Надёжный исполнитель"><i class="ri-medal-line"></i></div>
+          <div class="award-icon" title="Быстрый ответ"><i class="ri-flashlight-line"></i></div>
+          <div class="award-icon" title="Выбор редакции"><i class="ri-trophy-line"></i></div>
         </div>
       </div>
-    </div>
+    </aside>
 
-    <!-- Логин -->
-    <div class="panel" id="panel-login">
-      <div class="grid">
-        <label>Логин или Email
-          <input id="login-username" placeholder="username или email" />
-        </label>
-        <label>Пароль
-          <input id="login-password" type="password" placeholder="••••••••" />
-        </label>
-        <div class="row">
-          <button id="btn-login">Войти</button>
-          <div class="muted">Токен хранится в LocalStorage.</div>
-          <div class="row"><span class="chip" id="whoami">не авторизован</span></div>
-        </div>
-        <div class="row">
-          <button id="btn-logout" class="btn-danger">Выйти</button>
-          <div id="login-msg" class="muted"></div>
-        </div>
+    <!-- ЦЕНТРАЛЬНАЯ КОЛОНКА -->
+    <main class="center-col">
+      <!-- Табы -->
+      <div class="tabs">
+        <div class="tab-item active" data-tab="about">О себе</div>
+        <div class="tab-item" data-tab="portfolio">Портфолио</div>
+        <div class="tab-item" data-tab="reviews">Отзывы</div>
       </div>
-    </div>
 
-    <!-- Профиль -->
-    <div class="panel" id="panel-profile">
-      <div class="grid">
-        <div class="grid grid-2">
-          <label>Имя
-            <input id="me-first" />
-          </label>
-          <label>Фамилия
-            <input id="me-last" />
-          </label>
+      <!-- TAB: О себе -->
+      <section id="about-content" class="tab-content active">
+        <div class="section-block">
+          <div class="section-title">
+            <h3>Мои услуги</h3>
+            <button type="button" class="edit-btn"><i class="ri-pencil-line"></i>Редактировать</button>
+          </div>
+          <div class="services-grid" id="servicesGrid">
+            <!-- карточки услуг заполняются из JS или остаются примерами -->
+            <div class="service-card">
+              <div class="service-icon"><i class="ri-code-s-slash-line"></i></div>
+              <div class="service-name">Веб-разработка</div>
+              <p class="service-description">Сайты под ключ, лендинги и веб-сервисы.</p>
+            </div>
+            <div class="service-card">
+              <div class="service-icon"><i class="ri-smartphone-line"></i></div>
+              <div class="service-name">Мобильные приложения</div>
+              <p class="service-description">React Native / Flutter.</p>
+            </div>
+            <div class="service-card">
+              <div class="service-icon"><i class="ri-brush-line"></i></div>
+              <div class="service-name">UI/UX-дизайн</div>
+              <p class="service-description">Проектирование интерфейсов, прототипирование.</p>
+            </div>
+            <div class="service-card">
+              <div class="service-icon"><i class="ri-chat-smile-2-line"></i></div>
+              <div class="service-name">Консультации</div>
+              <p class="service-description">Аудит кода и архитектура.</p>
+            </div>
+          </div>
         </div>
-        <label>О себе
-          <textarea id="me-bio" maxlength="500" placeholder="кратко о себе..."></textarea>
-        </label>
+
+        <div class="section-block">
+          <div class="section-title">
+            <h3>Навыки</h3>
+            <button type="button" class="edit-btn"><i class="ri-pencil-line"></i>Редактировать</button>
+          </div>
+          <div id="skillsTags" class="tags-container">
+            <span class="tag">HTML</span><span class="tag">CSS</span><span class="tag">JavaScript</span>
+            <span class="tag">React</span><span class="tag">Node.js</span><span class="tag">Git</span><span class="tag">Figma</span>
+          </div>
+        </div>
+      </section>
+
+      <!-- TAB: Портфолио -->
+      <section id="portfolio-content" class="tab-content">
+        <div class="section-block">
+          <div class="section-title">
+            <h3>Портфолио</h3>
+            <button type="button" class="edit-btn" id="btnAddWork"><i class="ri-add-line"></i>Добавить работу</button>
+          </div>
+
+          <div class="filters">
+            <div class="filter-chip active">Все рубрики</div>
+            <div class="filter-chip">Веб-дизайн</div>
+            <div class="filter-chip">Логотипы</div>
+            <div class="filter-chip">Мобильные приложения</div>
+            <div class="filter-chip">UI/UX</div>
+          </div>
+
+          <div class="portfolio-grid" id="portfolioGrid">
+            <!-- карточки проектов рендерятся из JS -->
+          </div>
+        </div>
+      </section>
+
+      <!-- TAB: Отзывы -->
+      <section id="reviews-content" class="tab-content">
+        <div class="section-block">
+          <div class="reviews-header">
+            <div id="ratingNumberLg" class="rating-number-lg">5.0</div>
+            <div class="rating-info">
+              <div class="stars-lg"><i class="ri-star-fill"></i><i class="ri-star-fill"></i><i class="ri-star-fill"></i><i class="ri-star-fill"></i><i class="ri-star-fill"></i></div>
+              <div id="ratingCount" class="rating-count">на основе 0 оценок</div>
+            </div>
+          </div>
+
+          <div class="filters">
+            <div class="filter-chip active">Все отзывы</div>
+            <div class="filter-chip">5 звёзд</div>
+            <div class="filter-chip">4 звезды</div>
+            <div class="filter-chip">3 звезды</div>
+          </div>
+
+          <div id="reviewsList" class="review-list">
+            <!-- список отзывов рендерится из JS -->
+          </div>
+
+          <button type="button" class="load-more" id="btnMoreReviews">Показать ещё</button>
+        </div>
+      </section>
+    </main>
+
+    <!-- ПРАВАЯ КОЛОНКА -->
+    <aside class="right-col">
+      <div class="stats-card">
+        <h3>Статистика</h3>
+
+        <div class="rating-display">
+          <span id="ratingNumber" class="rating-number">5.0</span>
+          <div class="stars"><i class="ri-star-fill"></i><i class="ri-star-fill"></i><i class="ri-star-fill"></i><i class="ri-star-fill"></i><i class="ri-star-fill"></i></div>
+        </div>
+        <span id="ratingBadge" class="rating-badge">Новый аккаунт</span>
 
         <div>
-          <div class="row space-between">
-            <label>Навыки (id через запятую: 1,2)</label>
-            <button id="btn-load-skills" type="button">Загрузить навыки</button>
-          </div>
-          <input id="me-skill-ids" placeholder="например: 1,2,3" />
-          <div class="skills" id="skills-list"></div>
+          <div class="stat-row"><span>Выполнено заказов</span><span id="statDone" class="stat-value">0</span></div>
+          <div class="stat-row"><span>Получено отзывов</span><span id="statReviews" class="stat-value">0</span></div>
+          <div class="stat-row"><span>Успешно сданных</span><span id="statSuccess" class="stat-value">—</span></div>
+          <div class="stat-row"><span>Сданных вовремя</span><span id="statOnTime" class="stat-value">—</span></div>
+          <div class="stat-row"><span>Повторных заказов</span><span id="statRepeat" class="stat-value">—</span></div>
         </div>
-
-        <div class="row">
-          <button id="btn-load-me">Обновить из сервера</button>
-          <button id="btn-save-me">Сохранить профиль</button>
-          <div id="me-msg" class="muted"></div>
-        </div>
-        <div id="me-error" class="error"></div>
       </div>
-    </div>
+
+      <div class="availability-card">
+        <h4>Доступность</h4>
+        <p id="availabilityText">Готов к новым проектам. Отвечаю быстро.</p>
+      </div>
+    </aside>
   </div>
 
-  <script src="{% static 'pages/js/account.js' %}"></script>
-</body>
-</html>
+  <!-- МОДАЛКА ПОРТФОЛИО -->
+  <div class="modal-overlay" id="portfolioModal">
+    <div class="modal-content">
+      <button class="modal-close" data-close><i class="ri-close-line"></i></button>
+
+      <div id="modalView">
+        <div class="modal-gallery">
+          <div class="gallery-slide active"><i class="ri-image-line"></i></div>
+          <div class="gallery-slide"><i class="ri-layout-line"></i></div>
+          <div class="gallery-slide"><i class="ri-palette-line"></i></div>
+
+          <div class="gallery-nav">
+            <button class="gallery-btn" data-slide="-1"><i class="ri-arrow-left-s-line"></i></button>
+            <button class="gallery-btn" data-slide="1"><i class="ri-arrow-right-s-line"></i></button>
+          </div>
+
+          <div class="gallery-indicators">
+            <span class="indicator active" data-goto="0"></span>
+            <span class="indicator" data-goto="1"></span>
+            <span class="indicator" data-goto="2"></span>
+          </div>
+        </div>
+
+        <div class="modal-body">
+          <h2 id="mTitle" class="modal-title">—</h2>
+          <div class="modal-meta">
+            <div class="modal-meta-item"><i class="ri-calendar-line"></i><span id="mDate">—</span></div>
+            <div class="modal-meta-item"><i class="ri-time-line"></i><span id="mDuration">—</span></div>
+            <div class="modal-meta-item"><i class="ri-eye-line"></i><span id="mViews">—</span></div>
+          </div>
+          <p id="mDesc" class="modal-description">—</p>
+          <div id="mTags" class="modal-tags"></div>
+        </div>
+
+        <div class="modal-footer">
+          <button class="project-nav-btn prev" data-project="-1"><i class="ri-arrow-left-line"></i>Предыдущий проект</button>
+          <div style="display:flex;gap:10px">
+            <button class="edit-btn" id="mEdit"><i class="ri-pencil-line"></i>Редактировать</button>
+            <button class="edit-btn" id="mDelete" style="border-color:#d32f2f;color:#d32f2f"><i class="ri-delete-bin-line"></i>Удалить</button>
+          </div>
+          <button class="project-nav-btn next" data-project="1">Следующий проект<i class="ri-arrow-right-line"></i></button>
+        </div>
+      </div>
+
+      <!-- РЕЖИМ РЕДАКТИРОВАНИЯ -->
+      <div id="modalEdit" style="display:none">
+        <div class="edit-form-container">
+          <h2 style="margin-bottom:24px">Редактировать проект</h2>
+          <form id="editForm">
+            <div class="form-group">
+              <label class="form-label">Название проекта</label>
+              <input id="eTitle" type="text" class="form-input" required>
+            </div>
+
+            <div class="form-group">
+              <label class="form-label">Описание</label>
+              <textarea id="eDesc" class="form-textarea" required></textarea>
+            </div>
+
+            <div class="form-row">
+              <div class="form-group">
+                <label class="form-label">Дата</label>
+                <input id="eDate" type="text" class="form-input" required>
+              </div>
+              <div class="form-group">
+                <label class="form-label">Длительность</label>
+                <input id="eDuration" type="text" class="form-input" required>
+              </div>
+            </div>
+
+            <div class="form-group">
+              <label class="form-label">Теги (Enter — добавить)</label>
+              <div id="tagsBox" class="tags-input-container">
+                <input id="tagInput" type="text" class="tag-input-field" placeholder="Добавить тег...">
+              </div>
+            </div>
+
+            <div class="form-actions">
+              <button type="button" class="btn btn-secondary" id="eCancel">Отмена</button>
+              <button type="submit" class="btn btn-primary">Сохранить</button>
+            </div>
+          </form>
+        </div>
+      </div>
+
+    </div>
+  </div>
+{% endblock %}
