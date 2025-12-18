@@ -10,7 +10,7 @@ def account_hub(request):
     return render(request, "pages/auth_profile.html")
 
 def auth_login_page(request):
-    return render(request, "auth_login.html")
+    return render(request, "pages/auth_login.html")
 
 def auth_register_page(request):
-    return render(request, "auth_register.html")
+    return render(request, "pages/auth_register.html")

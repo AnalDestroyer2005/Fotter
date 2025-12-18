@@ -1,95 +1,84 @@
+{% extends "pages/base.html" %}
 {% load static %}
-<!doctype html>
-<html lang="ru">
-<head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>Аккаунт — Регистрация / Логин / Профиль</title>
-  <link rel="stylesheet" href="{% static 'pages/css/account.css' %}">
-</head>
-<body>
-  <div class="wrap">
-    <h1>Аккаунт</h1>
-    <div class="tabs">
-      <div class="tab active" data-tab="register">Регистрация</div>
-      <div class="tab" data-tab="login">Логин</div>
-      <div class="tab" data-tab="profile">Профиль</div>
-    </div>
+{% block title %}Аккаунт — FOTTER{% endblock %}
 
-    <!-- Регистрация -->
-    <div class="panel active" id="panel-register">
-      <div class="grid">
-        <label>Имя пользователя
-          <input id="reg-username" placeholder="username" />
-        </label>
-        <label>Email
-          <input id="reg-email" placeholder="you@example.com" />
-        </label>
-        <label>Пароль
-          <input id="reg-password" type="password" placeholder="••••••••" />
-        </label>
-        <div class="row">
-          <button id="btn-register">Создать аккаунт</button>
-          <div id="reg-msg" class="muted"></div>
-        </div>
+{% block content %}
+<main class="wrap">
+  <div class="account-page">
+
+    <!-- ЛЕВАЯ КОЛОНКА: карточка пользователя -->
+    <aside class="account-side card">
+      <div class="avatar-box">
+        <img id="acct-avatar" class="avatar-xxl" src="{% static 'pages/img/avatar_default.png' %}" alt="avatar">
       </div>
-    </div>
 
-    <!-- Логин -->
-    <div class="panel" id="panel-login">
-      <div class="grid">
-        <label>Логин или Email
-          <input id="login-username" placeholder="username или email" />
-        </label>
-        <label>Пароль
-          <input id="login-password" type="password" placeholder="••••••••" />
-        </label>
-        <div class="row">
-          <button id="btn-login">Войти</button>
-          <div class="muted">Токен хранится в LocalStorage.</div>
-          <div class="row"><span class="chip" id="whoami">не авторизован</span></div>
-        </div>
-        <div class="row">
-          <button id="btn-logout" class="btn-danger">Выйти</button>
-          <div id="login-msg" class="muted"></div>
-        </div>
+      <div class="uinfo">
+        <h3 id="acct-name" class="uname">—</h3>
+        <div id="acct-username" class="muted">@—</div>
+        <div id="acct-email" class="muted">—</div>
       </div>
-    </div>
 
-    <!-- Профиль -->
-    <div class="panel" id="panel-profile">
-      <div class="grid">
-        <div class="grid grid-2">
-          <label>Имя
-            <input id="me-first" />
-          </label>
-          <label>Фамилия
-            <input id="me-last" />
-          </label>
-        </div>
-        <label>О себе
-          <textarea id="me-bio" maxlength="500" placeholder="кратко о себе..."></textarea>
-        </label>
+      <button id="logout" class="btn btn-ghost full">Выйти</button>
+    </aside>
 
-        <div>
-          <div class="row space-between">
-            <label>Навыки (id через запятую: 1,2)</label>
-            <button id="btn-load-skills" type="button">Загрузить навыки</button>
+    <!-- ПРАВАЯ КОЛОНКА: вкладки и панели -->
+    <section class="account-main">
+      <nav class="tabs">
+        <button class="tab active" data-tab="profile">Профиль</button>
+        <button class="tab" data-tab="skills">Навыки</button>
+      </nav>
+
+      <!-- PANEL: Профиль -->
+      <section class="panel active card" id="panel-profile">
+        <form id="form-profile" class="stack">
+          <div class="split-2">
+            <label class="field">
+              <span class="label">Имя</span>
+              <input id="first_name" name="first_name" placeholder="Имя">
+            </label>
+            <label class="field">
+              <span class="label">Фамилия</span>
+              <input id="last_name" name="last_name" placeholder="Фамилия">
+            </label>
           </div>
-          <input id="me-skill-ids" placeholder="например: 1,2,3" />
-          <div class="skills" id="skills-list"></div>
-        </div>
 
-        <div class="row">
-          <button id="btn-load-me">Обновить из сервера</button>
-          <button id="btn-save-me">Сохранить профиль</button>
-          <div id="me-msg" class="muted"></div>
+          <label class="field">
+            <span class="label">О себе</span>
+            <textarea id="bio" name="bio" rows="4" placeholder="Кратко о себе"></textarea>
+          </label>
+
+          <div class="row space-between">
+            <span id="prof-hint" class="hint"></span>
+            <button type="submit" class="btn">Сохранить</button>
+          </div>
+        </form>
+      </section>
+
+      <!-- PANEL: Навыки -->
+      <section class="panel card" id="panel-skills">
+        <div class="stack">
+          <p class="muted">Отметь навыки из справочника. Можно несколько.</p>
+
+          <div id="skills-selected" class="skills selected"></div>
+
+          <div class="skills-pool">
+            <input id="skill-search" class="input" placeholder="Поиск навыков…">
+            <div id="skills-pool" class="skills"></div>
+          </div>
+
+          <div class="row space-between">
+            <span id="skills-hint" class="hint"></span>
+            <button id="btn-save-skills" class="btn">Сохранить навыки</button>
+          </div>
         </div>
-        <div id="me-error" class="error"></div>
-      </div>
-    </div>
+      </section>
+    </section>
+
   </div>
+</main>
 
-  <script src="{% static 'pages/js/account.js' %}"></script>
-</body>
-</html>
+{% block extra_head %}
+<link rel="stylesheet" href="{% static 'pages/css/account.css' %}">
+<script defer src="{% static 'pages/js/account.js' %}"></script>
+{% endblock %}
+{% endblock %}
