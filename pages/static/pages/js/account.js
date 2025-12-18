@@ -1,281 +1,485 @@
-// ===== Account page logic (tabs + auth + profile + skills) =====
-
-// ---------------- Tabs ----------------
-document.addEventListener("DOMContentLoaded", () => {
-  const tabs = Array.from(document.querySelectorAll(".tab[data-tab]"));
-  const panels = Array.from(document.querySelectorAll(".panel"));
-
-  function activate(tabName) {
-    tabs.forEach(x => x.classList.toggle("active", x.dataset.tab === tabName));
-    panels.forEach(x => x.classList.toggle("active", x.id === "panel-" + tabName));
+let portfolioData = [
+  {
+      id: 1,
+      title: "Корпоративный сайт для IT-компании",
+      description: "Разработал современный корпоративный сайт для IT-компании с акцентом на минимализм и функциональность. Проект включал в себя: дизайн всех страниц, адаптивную верстку, интеграцию с CMS, оптимизацию скорости загрузки и SEO-оптимизацию. Клиент остался очень доволен результатом.",
+      date: "Декабрь 2024",
+      duration: "3 недели",
+      views: "1,234 просмотра",
+      tags: ["Веб-дизайн", "UI/UX", "HTML/CSS", "JavaScript", "Figma"],
+      images: 3
+  },
+  {
+      id: 2,
+      title: "Приложение для доставки",
+      description: "Создал интуитивное мобильное приложение для сервиса доставки еды. Разработал пользовательский интерфейс с упором на простоту и скорость оформления заказа. Включает систему отслеживания курьера в реальном времени, историю заказов и программу лояльности.",
+      date: "Ноябрь 2024",
+      duration: "4 недели",
+      views: "892 просмотра",
+      tags: ["Мобильные приложения", "React Native", "UI/UX", "Figma"],
+      images: 3
+  },
+  {
+      id: 3,
+      title: "Редизайн интернет-магазина",
+      description: "Полный редизайн интернет-магазина одежды с целью повышения конверсии. Упростил процесс оформления заказа, улучшил навигацию по каталогу, добавил персональные рекомендации. После запуска конверсия выросла на 35%.",
+      date: "Октябрь 2024",
+      duration: "5 недель",
+      views: "2,156 просмотров",
+      tags: ["E-commerce", "UI/UX", "Веб-дизайн", "Figma"],
+      images: 3
+  },
+  {
+      id: 4,
+      title: "Логотип для стартапа",
+      description: "Разработал минималистичную айдентику для финтех стартапа. Логотип отражает надежность и инновационность компании. Создал полный фирменный стиль включая визитки, презентации и социальные сети.",
+      date: "Октябрь 2024",
+      duration: "2 недели",
+      views: "678 просмотров",
+      tags: ["Брендинг", "Логотип", "Фирменный стиль", "Illustrator"],
+      images: 3
+  },
+  {
+      id: 5,
+      title: "Лендинг платформы",
+      description: "Спроектировал продающий лендинг для образовательной платформы онлайн-курсов. Сделал акцент на преимуществах обучения, добавил отзывы студентов и демо-уроки. Лендинг показал высокую конверсию с первых дней запуска.",
+      date: "Сентябрь 2024",
+      duration: "2 недели",
+      views: "1,445 просмотров",
+      tags: ["Landing Page", "Веб-дизайн", "Conversion", "Figma"],
+      images: 3
+  },
+  {
+      id: 6,
+      title: "UI/UX Банковского приложения",
+      description: "Разработал безопасный и интуитивный интерфейс для мобильного банковского приложения. Особое внимание уделил простоте операций и защите данных. Провел UX-исследование и тестирование с реальными пользователями.",
+      date: "Август 2024",
+      duration: "6 недель",
+      views: "3,021 просмотр",
+      tags: ["Fintech", "UI/UX", "Mobile", "Security", "Figma"],
+      images: 3
   }
+];
 
-  tabs.forEach(t => {
-    t.addEventListener("click", (e) => {
-      e.preventDefault();
-      activate(t.dataset.tab);
-    });
+let currentProject = 0;
+let currentSlide = 0;
+let editMode = false;
+let editingProjectId = null;
+let servicesEditing = false;
+let skillsEditing = false;
+
+// Tab switching functionality
+const tabItems = document.querySelectorAll('.tab-item');
+const tabContents = document.querySelectorAll('.tab-content');
+
+tabItems.forEach(tab => {
+  tab.addEventListener('click', () => {
+      const targetTab = tab.getAttribute('data-tab');
+      
+      tabItems.forEach(t => t.classList.remove('active'));
+      tabContents.forEach(c => c.classList.remove('active'));
+      
+      tab.classList.add('active');
+      document.getElementById(`${targetTab}-content`).classList.add('active');
   });
-
-  // если ничего не активно — активируем первую вкладку
-  const first = tabs[0]?.dataset.tab;
-  if (first && !tabs.some(t => t.classList.contains("active"))) activate(first);
 });
 
-// ---------------- API ----------------
-const API = {
-  register: "/api/register/",
-  login: "/api/login/",
-  me: "/api/me/",
-  skills: "/api/skills/",
-};
-const LS_ACCESS  = "access_token";
-const LS_REFRESH = "refresh_token";
-const LS_USER    = "fotter_user";
+// Filter chips functionality
+const filterChips = document.querySelectorAll('.filter-chip');
+filterChips.forEach(chip => {
+  chip.addEventListener('click', () => {
+      const parent = chip.parentElement;
+      parent.querySelectorAll('.filter-chip').forEach(c => c.classList.remove('active'));
+      chip.classList.add('active');
+  });
+});
 
-// ---------------- Utils ----------------
-const $  = (id) => document.getElementById(id);
-const qs = (s, root=document) => root.querySelector(s);
-
-function setMsg(id, text, ok=false, isErr=false) {
-  const el = $(id);
-  if (!el) return;
-  el.textContent = text || "";
-  el.className = isErr ? "error" : ok ? "ok" : "muted";
+// Render portfolio grid
+function renderPortfolio() {
+  const grid = document.querySelector('.portfolio-grid');
+  if (!grid) return;
+  
+  grid.innerHTML = portfolioData.map((project, index) => `
+      <div class="portfolio-item" onclick="openModal(${index})">
+          <div class="portfolio-actions">
+              <button class="action-btn" onclick="event.stopPropagation(); openModalForEdit(${index})">
+                  <i class="ri-pencil-line"></i>
+              </button>
+              <button class="action-btn delete" onclick="event.stopPropagation(); confirmDelete(${index})">
+                  <i class="ri-delete-bin-line"></i>
+              </button>
+          </div>
+          <div class="portfolio-thumb">
+              <i class="ri-image-line"></i>
+          </div>
+          <div class="portfolio-info">
+              <div class="portfolio-title">${project.title}</div>
+              <div class="portfolio-desc">${project.description.substring(0, 80)}...</div>
+          </div>
+      </div>
+  `).join('');
 }
 
-function authHeader() {
-  const t = localStorage.getItem(LS_ACCESS);
-  return t ? { Authorization: "Bearer " + t } : {};
+// Open modal for new project or editing
+function openModalForEdit(projectIndex = null) {
+  editingProjectId = projectIndex !== null ? portfolioData[projectIndex].id : null;
+  editMode = true;
+
+  const titleEl = document.getElementById('eTitle');
+  const descEl = document.getElementById('eDesc');
+  const dateEl = document.getElementById('eDate');
+  const durationEl = document.getElementById('eDuration');
+  const tagsBox = document.getElementById('tagsBox');
+
+  if (!titleEl || !descEl || !dateEl || !durationEl || !tagsBox) return;
+
+  if (projectIndex !== null) {
+      const project = portfolioData[projectIndex];
+      titleEl.value = project.title;
+      descEl.value = project.description;
+      dateEl.value = project.date;
+      durationEl.value = project.duration;
+
+      const tagInput = document.getElementById('tagInput');
+      tagsBox.innerHTML = '';
+      project.tags.forEach(tag => addTagChip(tag));
+      if (tagInput) tagsBox.appendChild(tagInput);
+  } else {
+      document.getElementById('editForm')?.reset();
+      tagsBox.innerHTML = '<input type="text" class="tag-input-field" id="tagInput" placeholder="Введите тег...">';
+  }
+
+  document.getElementById('portfolioModal')?.classList.add('active');
+  document.getElementById('modalView').style.display = 'none';
+  document.getElementById('modalEdit').style.display = 'block';
+  document.body.style.overflow = 'hidden';
+
+  setupTagInput();
 }
 
-function getNextUrl() {
-  const q = new URLSearchParams(location.search).get("next");
-  if (q && /^\/[^\s]*$/.test(q)) return q;
-  const hidden = qs('input[name="next"]')?.value;
-  if (hidden && /^\/[^\s]*$/.test(hidden)) return hidden;
-  return "/account/";
-}
-
-function whoami() {
-  const t = localStorage.getItem(LS_ACCESS);
-  const el = $("whoami");
-  if (el) el.textContent = t ? "access: " + t.slice(0, 16) + "…" : "не авторизован";
-}
-whoami();
-
-// ---------------- Auth: Register ----------------
-$("btn-register")?.addEventListener("click", async () => {
-  setMsg("reg-msg", "Отправляю…");
-  const body = {
-    username: $("reg-username")?.value.trim(),
-    email: $("reg-email")?.value.trim(),
-    password: $("reg-password")?.value,
+// Setup tag input functionality
+function setupTagInput() {
+  const tagInput = document.getElementById('tagInput');
+  if (!tagInput) return;
+  
+  tagInput.onkeydown = (e) => {
+      if (e.key === 'Enter') {
+          e.preventDefault();
+          const value = tagInput.value.trim();
+          if (value) {
+              addTagChip(value);
+              tagInput.value = '';
+          }
+      }
   };
-  try {
-    const r = await fetch(API.register, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(body),
-    });
-    const j = await r.json();
-    if (!r.ok) throw j;
-
-    // Автовход после регистрации
-    const r2 = await fetch(API.login, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ username: body.username, password: body.password }),
-    });
-    const j2 = await r2.json();
-    if (!r2.ok) throw j2;
-
-    localStorage.setItem(LS_ACCESS, j2.access);
-    localStorage.setItem(LS_REFRESH, j2.refresh);
-    setMsg("reg-msg", "Готово!", true);
-    whoami();
-    window.location.replace(getNextUrl());
-  } catch (e) {
-    setMsg("reg-msg", JSON.stringify(e, null, 2), false, true);
-  }
-});
-
-// ---------------- Auth: Login / Logout ----------------
-$("btn-login")?.addEventListener("click", async () => {
-  setMsg("login-msg", "Проверяю…");
-  const body = {
-    username: $("login-username")?.value.trim(),
-    password: $("login-password")?.value,
-  };
-  try {
-    const r = await fetch(API.login, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(body),
-    });
-    const j = await r.json();
-    if (!r.ok) throw j;
-
-    localStorage.setItem(LS_ACCESS, j.access);
-    localStorage.setItem(LS_REFRESH, j.refresh);
-    setMsg("login-msg", "Вход выполнен.", true);
-    whoami();
-
-    // sanity-пинг /api/me (не блокируем редирект при ошибке)
-    try { await fetch(API.me, { headers: authHeader() }); } catch {}
-    window.location.replace(getNextUrl());
-  } catch (e) {
-    setMsg("login-msg", JSON.stringify(e, null, 2), false, true);
-  }
-});
-
-$("btn-logout")?.addEventListener("click", () => {
-  localStorage.removeItem(LS_ACCESS);
-  localStorage.removeItem(LS_REFRESH);
-  localStorage.removeItem(LS_USER);
-  whoami();
-  setMsg("login-msg", "Вышел.", true);
-  window.location.replace("/");
-});
-
-// ---------------- Profile: Load ----------------
-$("btn-load-me")?.addEventListener("click", loadMe);
-async function loadMe() {
-  $("me-error") && ( $("me-error").textContent = "" );
-  setMsg("me-msg", "Загружаю…");
-  try {
-    const r = await fetch(API.me, { headers: authHeader() });
-    const j = await r.json();
-    if (!r.ok) throw j;
-
-    $("me-first") && ( $("me-first").value = j.first_name || "" );
-    $("me-last")  && ( $("me-last").value  = j.last_name  || "" );
-    $("me-bio")   && ( $("me-bio").value   = j.bio || "" );
-
-    // если backend отдаёт skills: [{id,name}] — отметим их
-    if (Array.isArray(j.skills)) {
-      selectedSkillIds = new Set(j.skills.map(s => s.id ?? s));
-      syncSelectedChips();
-    }
-
-    localStorage.setItem(LS_USER, JSON.stringify(j));
-    setMsg("me-msg", "Профиль загружен.", true);
-  } catch (e) {
-    $("me-error") && ( $("me-error").textContent = JSON.stringify(e, null, 2) );
-    setMsg("me-msg", "");
-  }
 }
 
-// ---------------- Skills: Load & UI ----------------
-let ALL_SKILLS = [];
-let selectedSkillIds = new Set();
-
-$("btn-load-skills")?.addEventListener("click", loadSkills);
-async function loadSkills() {
-  const r = await fetch(API.skills);
-  const j = await r.json();
-  const list = Array.isArray(j) ? j : (j.results || []);
-  ALL_SKILLS = list;
-
-  const box = $("skills-list");
-  if (!box) return;
-  box.innerHTML = "";
-  list.forEach(s => {
-    const chip = document.createElement("button");
-    chip.type = "button";
-    chip.className = "chip";
-    chip.dataset.id = s.id;
-    chip.textContent = `${s.name}`;
-    chip.addEventListener("click", () => {
-      const id = Number(chip.dataset.id);
-      if (selectedSkillIds.has(id)) selectedSkillIds.delete(id);
-      else selectedSkillIds.add(id);
-      syncSelectedChips();
-    });
-    box.appendChild(chip);
-  });
-
-  // если skills уже были отмечены (после loadMe), то синхронизируем вид
-  syncSelectedChips();
+// Add tag chip
+function addTagChip(tagText) {
+  const tagsContainer = document.getElementById('tagsBox');
+  const tagInput = document.getElementById('tagInput');
+  if (!tagsContainer || !tagInput) return;
+  
+  const chip = document.createElement('div');
+  chip.className = 'tag-input-chip';
+  chip.innerHTML = `
+      <span>${tagText}</span>
+      <span class="tag-remove" onclick="this.parentElement.remove()">×</span>
+  `;
+  
+  tagsContainer.insertBefore(chip, tagInput);
 }
 
-function syncSelectedChips() {
-  // Подсветим выбранные
-  document.querySelectorAll("#skills-list .chip").forEach(ch => {
-    const id = Number(ch.dataset.id);
-    ch.classList.toggle("active", selectedSkillIds.has(id));
-  });
+// Get tags from form
+function getTagsFromForm() {
+  const chips = document.querySelectorAll('.tag-input-chip span:first-child');
+  return Array.from(chips).map(chip => chip.textContent);
+}
 
-  // Отрендерим выбранные (если есть контейнер)
-  const picked = $("skills-picked");
-  if (picked) {
-    picked.innerHTML = "";
-    const arr = ALL_SKILLS.filter(x => selectedSkillIds.has(x.id));
-    if (!arr.length) {
-      picked.innerHTML = `<span class="muted">Навыки не выбраны</span>`;
-    } else {
-      arr.forEach(x => {
-        const tag = document.createElement("span");
-        tag.className = "chip active";
-        tag.textContent = x.name;
-        picked.appendChild(tag);
+// Save project
+function saveProject(event) {
+  event.preventDefault();
+  
+  const title = document.getElementById('eTitle').value;
+  const description = document.getElementById('eDesc').value;
+  const date = document.getElementById('eDate').value;
+  const duration = document.getElementById('eDuration').value;
+  const tags = getTagsFromForm();
+  
+  if (editingProjectId) {
+      // Update existing project
+      const index = portfolioData.findIndex(p => p.id === editingProjectId);
+      if (index !== -1) {
+          portfolioData[index] = {
+              ...portfolioData[index],
+              title,
+              description,
+              date,
+              duration,
+              tags
+          };
+      }
+  } else {
+      // Add new project
+      const newId = Math.max(...portfolioData.map(p => p.id), 0) + 1;
+      portfolioData.push({
+          id: newId,
+          title,
+          description,
+          date,
+          duration,
+          views: '0 просмотров',
+          tags,
+          images: 3
       });
-    }
   }
-
-  // обновим скрытое поле, если оно есть (через запятую)
-  const hidden = $("me-skill-ids");
-  if (hidden) hidden.value = Array.from(selectedSkillIds).join(",");
+  
+  renderPortfolio();
+  cancelEditing();
 }
 
-// ---------------- Profile: Save ----------------
-$("btn-save-me")?.addEventListener("click", saveProfile);
-async function saveProfile() {
-  $("me-error") && ( $("me-error").textContent = "" );
-  setMsg("me-msg", "Сохраняю…");
+// Start editing current project in modal
+function startEditingProject() {
+  openModalForEdit(currentProject);
+}
 
-  // берём ids либо из выбранных чипов, либо из инпута
-  let ids = Array.from(selectedSkillIds);
-  if (!ids.length && $("me-skill-ids")) {
-    ids = $("me-skill-ids").value
-      .split(",").map(x => parseInt(x.trim(), 10)).filter(Boolean);
-  }
-
-  // отправляем краткую форму: skills: [ids]
-  const body = {
-    first_name: $("me-first")?.value ?? "",
-    last_name:  $("me-last")?.value  ?? "",
-    bio:        $("me-bio")?.value   ?? "",
-    skills:     ids,
-  };
-
-  try {
-    const r = await fetch(API.me, {
-      method: "PATCH",
-      headers: { "Content-Type": "application/json", ...authHeader() },
-      body: JSON.stringify(body),
-    });
-    const j = await r.json();
-    if (!r.ok) throw j;
-
-    // обновим локальный кэш
-    localStorage.setItem(LS_USER, JSON.stringify(j));
-
-    // синхронизируем выбранные навыки из ответа (если backend вернул)
-    if (Array.isArray(j.skills)) {
-      selectedSkillIds = new Set(j.skills.map(s => s.id ?? s));
-      syncSelectedChips();
-    }
-
-    setMsg("me-msg", "Сохранено.", true);
-  } catch (e) {
-    $("me-error") && ( $("me-error").textContent = JSON.stringify(e, null, 2) );
-    setMsg("me-msg", "");
+// Cancel editing
+function cancelEditing() {
+  document.getElementById('modalEdit').style.display = 'none';
+  document.getElementById('modalView').style.display = 'block';
+  editMode = false;
+  editingProjectId = null;
+  
+  if (portfolioData.length > 0) {
+      updateModalContent();
+  } else {
+      closeModal();
   }
 }
 
-// ---------------- Auto-init ----------------
-// если на странице уже есть форму профиля — сразу грузим
-if ($("me-first") || $("btn-load-me")) loadMe().catch(()=>{});
-// если есть контейнер с навыками — сразу подгружаем пулл
-if ($("skills-list") || $("btn-load-skills")) loadSkills().catch(()=>{});
+// Confirm delete
+function confirmDelete(projectIndex) {
+  if (confirm('Вы уверены, что хотите удалить этот проект?')) {
+      portfolioData.splice(projectIndex, 1);
+      renderPortfolio();
+  }
+}
+
+// Delete current project from modal
+function deleteProject() {
+  if (confirm('Вы уверены, что хотите удалить этот проект?')) {
+      portfolioData.splice(currentProject, 1);
+      renderPortfolio();
+      
+      if (portfolioData.length > 0) {
+          if (currentProject >= portfolioData.length) {
+              currentProject = portfolioData.length - 1;
+          }
+          updateModalContent();
+      } else {
+          closeModal();
+      }
+  }
+}
+
+// Portfolio modal functions
+function openModal(projectIndex) {
+  currentProject = projectIndex;
+  currentSlide = 0;
+  updateModalContent();
+  const modal = document.getElementById('portfolioModal');
+  if (modal) {
+      modal.classList.add('active');
+      document.body.style.overflow = 'hidden';
+  }
+}
+
+function closeModal() {
+  const modal = document.getElementById('portfolioModal');
+  if (modal) {
+      modal.classList.remove('active');
+      document.body.style.overflow = 'auto';
+  }
+}
+
+function updateModalContent() {
+  const project = portfolioData[currentProject];
+  
+  document.getElementById('mTitle').textContent = project.title;
+  document.getElementById('mDesc').textContent = project.description;
+  document.getElementById('mDate').textContent = project.date;
+  document.getElementById('mDuration').textContent = project.duration;
+  document.getElementById('mViews').textContent = project.views;
+  
+  const tagsContainer = document.getElementById('mTags');
+  if (tagsContainer) {
+      tagsContainer.innerHTML = project.tags.map(tag => 
+          `<span class="modal-tag">${tag}</span>`
+      ).join('');
+  }
+
+  // Update navigation buttons
+  const prevBtn = document.querySelector('.project-nav-btn.prev');
+  const nextBtn = document.querySelector('.project-nav-btn.next');
+  if (prevBtn) prevBtn.disabled = currentProject === 0;
+  if (nextBtn) nextBtn.disabled = currentProject === portfolioData.length - 1;
+  
+  // Reset slide
+  goToSlide(0);
+}
+
+function changeSlide(direction) {
+  const slides = document.querySelectorAll('.gallery-slide');
+  const indicators = document.querySelectorAll('.indicator');
+  
+  currentSlide += direction;
+  
+  if (currentSlide < 0) currentSlide = slides.length - 1;
+  if (currentSlide >= slides.length) currentSlide = 0;
+  
+  slides.forEach((slide, index) => {
+      slide.classList.toggle('active', index === currentSlide);
+  });
+  
+  indicators.forEach((indicator, index) => {
+      indicator.classList.toggle('active', index === currentSlide);
+  });
+}
+
+function goToSlide(index) {
+  currentSlide = index;
+  const slides = document.querySelectorAll('.gallery-slide');
+  const indicators = document.querySelectorAll('.indicator');
+  
+  slides.forEach((slide, i) => {
+      slide.classList.toggle('active', i === index);
+  });
+  
+  indicators.forEach((indicator, i) => {
+      indicator.classList.toggle('active', i === index);
+  });
+}
+
+function changeProject(direction) {
+  const newIndex = currentProject + direction;
+  
+  if (newIndex >= 0 && newIndex < portfolioData.length) {
+      currentProject = newIndex;
+      updateModalContent();
+  }
+}
+
+
+// Services edit (about section)
+function setupServicesEditor() {
+  const grid = document.getElementById('servicesGrid');
+  const btn = grid?.closest('.section-block')?.querySelector('.edit-btn');
+  if (!grid || !btn) return;
+
+  btn.addEventListener('click', () => {
+      servicesEditing = !servicesEditing;
+      grid.classList.toggle('is-editing', servicesEditing);
+      const text = servicesEditing ? '?????????' : '?????????????';
+      btn.innerHTML = `<i class="ri-${servicesEditing ? 'check' : 'pencil'}-line"></i>${text}`;
+
+      grid.querySelectorAll('.service-name, .service-description').forEach(el => {
+          el.contentEditable = servicesEditing;
+          el.classList.toggle('editable', servicesEditing);
+      });
+  });
+}
+
+// Skills edit
+function createSkillTag(text) {
+  const tag = document.createElement('span');
+  tag.className = 'tag';
+  tag.textContent = text;
+  return tag;
+}
+
+function setupSkillsEditor() {
+  const box = document.getElementById('skillsTags');
+  const btn = box?.closest('.section-block')?.querySelector('.edit-btn');
+  if (!box || !btn) return;
+
+  const inputId = 'skillInput';
+
+  btn.addEventListener('click', () => {
+      skillsEditing = !skillsEditing;
+      box.classList.toggle('is-editing', skillsEditing);
+      const text = skillsEditing ? '??????' : '?????????????';
+      btn.innerHTML = `<i class="ri-${skillsEditing ? 'check' : 'pencil'}-line"></i>${text}`;
+
+      box.querySelectorAll('.tag').forEach(tag => {
+          tag.contentEditable = skillsEditing;
+          tag.classList.toggle('editable', skillsEditing);
+          tag.onclick = skillsEditing ? () => tag.remove() : null;
+      });
+
+      if (skillsEditing) {
+          if (!box.querySelector('#' + inputId)) {
+              const input = document.createElement('input');
+              input.id = inputId;
+              input.type = 'text';
+              input.className = 'tag-input-field';
+              input.placeholder = '????? ????? ? Enter';
+              input.onkeydown = (e) => {
+                  if (e.key === 'Enter') {
+                      e.preventDefault();
+                      const value = input.value.trim();
+                      if (value) {
+                          const tag = createSkillTag(value);
+                          box.insertBefore(tag, input);
+                          input.value = '';
+                      }
+                  }
+              };
+              box.appendChild(input);
+          }
+      } else {
+          box.querySelector('#' + inputId)?.remove();
+          box.querySelectorAll('.tag').forEach(tag => { tag.onclick = null; tag.contentEditable = false; });
+      }
+  });
+}
+
+// Init listeners
+document.addEventListener('DOMContentLoaded', () => {
+  renderPortfolio();
+
+  const addWorkBtn = document.getElementById('btnAddWork');
+  if (addWorkBtn) addWorkBtn.addEventListener('click', () => openModalForEdit());
+
+  setupServicesEditor();
+  setupSkillsEditor();
+
+  document.getElementById('editForm')?.addEventListener('submit', saveProject);
+  document.getElementById('eCancel')?.addEventListener('click', cancelEditing);
+
+  document.getElementById('mEdit')?.addEventListener('click', startEditingProject);
+  document.getElementById('mDelete')?.addEventListener('click', deleteProject);
+  document.querySelector('[data-close]')?.addEventListener('click', closeModal);
+
+  document.querySelectorAll('[data-slide]').forEach(btn => {
+      btn.addEventListener('click', () => changeSlide(Number(btn.dataset.slide) || 0));
+  });
+  document.querySelectorAll('[data-goto]').forEach(indicator => {
+      indicator.addEventListener('click', () => goToSlide(Number(indicator.dataset.goto) || 0));
+  });
+  document.querySelectorAll('[data-project]').forEach(btn => {
+      btn.addEventListener('click', () => changeProject(Number(btn.dataset.project) || 0));
+  });
+
+  document.getElementById('portfolioModal')?.addEventListener('click', (e) => {
+      if (e.target.id === 'portfolioModal') {
+          closeModal();
+      }
+  });
+});
+
+// Close modal on Escape key
+document.addEventListener('keydown', (e) => {
+  if (e.key === 'Escape') closeModal();
+  if (e.key === 'ArrowLeft') changeSlide(-1);
+  if (e.key === 'ArrowRight') changeSlide(1);
+});

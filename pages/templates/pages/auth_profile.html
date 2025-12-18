@@ -2,83 +2,260 @@
 {% load static %}
 {% block title %}Аккаунт — FOTTER{% endblock %}
 
+{% block extra_head %}
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/remixicon/4.6.0/remixicon.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="{% static 'pages/css/account.css' %}">
+  <script defer src="{% static 'pages/js/account.js' %}"></script>
+{% endblock %}
+
 {% block content %}
-<main class="wrap">
-  <div class="account-page">
+  <!-- Основной контейнер страницы аккаунта -->
+  <div class="main-container account" data-username="{{ request.user.username|default:'' }}">
 
-    <!-- ЛЕВАЯ КОЛОНКА: карточка пользователя -->
-    <aside class="account-side card">
-      <div class="avatar-box">
-        <img id="acct-avatar" class="avatar-xxl" src="{% static 'pages/img/avatar_default.png' %}" alt="avatar">
+    <!-- ЛЕВАЯ КОЛОНКА -->
+    <aside class="left-col">
+      <div class="profile-card">
+        <div id="accAvatar" class="profile-avatar-large"></div>
+        <h2 id="accName" class="profile-name">—</h2>
+
+        <div class="verification-badge">
+          <i class="ri-verified-badge-fill"></i>
+          <span id="accVerifyText">Личность не подтверждена</span>
+        </div>
+
+        <div class="info-list">
+          <div class="info-item">
+            <i class="ri-calendar-line"></i>
+            <span id="accJoined">На FOTTER с —</span>
+          </div>
+          <div class="info-item">
+            <i class="ri-checkbox-circle-line"></i>
+            <span id="accOnline" class="online-status">Оффлайн</span>
+          </div>
+        </div>
+
+        <div class="awards-section">
+          <div class="award-icon" title="Надёжный исполнитель"><i class="ri-medal-line"></i></div>
+          <div class="award-icon" title="Быстрый ответ"><i class="ri-flashlight-line"></i></div>
+          <div class="award-icon" title="Выбор редакции"><i class="ri-trophy-line"></i></div>
+        </div>
       </div>
-
-      <div class="uinfo">
-        <h3 id="acct-name" class="uname">—</h3>
-        <div id="acct-username" class="muted">@—</div>
-        <div id="acct-email" class="muted">—</div>
-      </div>
-
-      <button id="logout" class="btn btn-ghost full">Выйти</button>
     </aside>
 
-    <!-- ПРАВАЯ КОЛОНКА: вкладки и панели -->
-    <section class="account-main">
-      <nav class="tabs">
-        <button class="tab active" data-tab="profile">Профиль</button>
-        <button class="tab" data-tab="skills">Навыки</button>
-      </nav>
+    <!-- ЦЕНТРАЛЬНАЯ КОЛОНКА -->
+    <main class="center-col">
+      <!-- Табы -->
+      <div class="tabs">
+        <div class="tab-item active" data-tab="about">О себе</div>
+        <div class="tab-item" data-tab="portfolio">Портфолио</div>
+        <div class="tab-item" data-tab="reviews">Отзывы</div>
+      </div>
 
-      <!-- PANEL: Профиль -->
-      <section class="panel active card" id="panel-profile">
-        <form id="form-profile" class="stack">
-          <div class="split-2">
-            <label class="field">
-              <span class="label">Имя</span>
-              <input id="first_name" name="first_name" placeholder="Имя">
-            </label>
-            <label class="field">
-              <span class="label">Фамилия</span>
-              <input id="last_name" name="last_name" placeholder="Фамилия">
-            </label>
+      <!-- TAB: О себе -->
+      <section id="about-content" class="tab-content active">
+        <div class="section-block">
+          <div class="section-title">
+            <h3>Мои услуги</h3>
+            <button type="button" class="edit-btn"><i class="ri-pencil-line"></i>Редактировать</button>
           </div>
-
-          <label class="field">
-            <span class="label">О себе</span>
-            <textarea id="bio" name="bio" rows="4" placeholder="Кратко о себе"></textarea>
-          </label>
-
-          <div class="row space-between">
-            <span id="prof-hint" class="hint"></span>
-            <button type="submit" class="btn">Сохранить</button>
+          <div class="services-grid" id="servicesGrid">
+            <!-- карточки услуг заполняются из JS или остаются примерами -->
+            <div class="service-card">
+              <div class="service-icon"><i class="ri-code-s-slash-line"></i></div>
+              <div class="service-name">Веб-разработка</div>
+              <p class="service-description">Сайты под ключ, лендинги и веб-сервисы.</p>
+            </div>
+            <div class="service-card">
+              <div class="service-icon"><i class="ri-smartphone-line"></i></div>
+              <div class="service-name">Мобильные приложения</div>
+              <p class="service-description">React Native / Flutter.</p>
+            </div>
+            <div class="service-card">
+              <div class="service-icon"><i class="ri-brush-line"></i></div>
+              <div class="service-name">UI/UX-дизайн</div>
+              <p class="service-description">Проектирование интерфейсов, прототипирование.</p>
+            </div>
+            <div class="service-card">
+              <div class="service-icon"><i class="ri-chat-smile-2-line"></i></div>
+              <div class="service-name">Консультации</div>
+              <p class="service-description">Аудит кода и архитектура.</p>
+            </div>
           </div>
-        </form>
-      </section>
+        </div>
 
-      <!-- PANEL: Навыки -->
-      <section class="panel card" id="panel-skills">
-        <div class="stack">
-          <p class="muted">Отметь навыки из справочника. Можно несколько.</p>
-
-          <div id="skills-selected" class="skills selected"></div>
-
-          <div class="skills-pool">
-            <input id="skill-search" class="input" placeholder="Поиск навыков…">
-            <div id="skills-pool" class="skills"></div>
+        <div class="section-block">
+          <div class="section-title">
+            <h3>Навыки</h3>
+            <button type="button" class="edit-btn"><i class="ri-pencil-line"></i>Редактировать</button>
           </div>
-
-          <div class="row space-between">
-            <span id="skills-hint" class="hint"></span>
-            <button id="btn-save-skills" class="btn">Сохранить навыки</button>
+          <div id="skillsTags" class="tags-container">
+            <span class="tag">HTML</span><span class="tag">CSS</span><span class="tag">JavaScript</span>
+            <span class="tag">React</span><span class="tag">Node.js</span><span class="tag">Git</span><span class="tag">Figma</span>
           </div>
         </div>
       </section>
-    </section>
 
+      <!-- TAB: Портфолио -->
+      <section id="portfolio-content" class="tab-content">
+        <div class="section-block">
+          <div class="section-title">
+            <h3>Портфолио</h3>
+            <button type="button" class="edit-btn" id="btnAddWork"><i class="ri-add-line"></i>Добавить работу</button>
+          </div>
+
+          <div class="filters">
+            <div class="filter-chip active">Все рубрики</div>
+            <div class="filter-chip">Веб-дизайн</div>
+            <div class="filter-chip">Логотипы</div>
+            <div class="filter-chip">Мобильные приложения</div>
+            <div class="filter-chip">UI/UX</div>
+          </div>
+
+          <div class="portfolio-grid" id="portfolioGrid">
+            <!-- карточки проектов рендерятся из JS -->
+          </div>
+        </div>
+      </section>
+
+      <!-- TAB: Отзывы -->
+      <section id="reviews-content" class="tab-content">
+        <div class="section-block">
+          <div class="reviews-header">
+            <div id="ratingNumberLg" class="rating-number-lg">5.0</div>
+            <div class="rating-info">
+              <div class="stars-lg"><i class="ri-star-fill"></i><i class="ri-star-fill"></i><i class="ri-star-fill"></i><i class="ri-star-fill"></i><i class="ri-star-fill"></i></div>
+              <div id="ratingCount" class="rating-count">на основе 0 оценок</div>
+            </div>
+          </div>
+
+          <div class="filters">
+            <div class="filter-chip active">Все отзывы</div>
+            <div class="filter-chip">5 звёзд</div>
+            <div class="filter-chip">4 звезды</div>
+            <div class="filter-chip">3 звезды</div>
+          </div>
+
+          <div id="reviewsList" class="review-list">
+            <!-- список отзывов рендерится из JS -->
+          </div>
+
+          <button type="button" class="load-more" id="btnMoreReviews">Показать ещё</button>
+        </div>
+      </section>
+    </main>
+
+    <!-- ПРАВАЯ КОЛОНКА -->
+    <aside class="right-col">
+      <div class="stats-card">
+        <h3>Статистика</h3>
+
+        <div class="rating-display">
+          <span id="ratingNumber" class="rating-number">5.0</span>
+          <div class="stars"><i class="ri-star-fill"></i><i class="ri-star-fill"></i><i class="ri-star-fill"></i><i class="ri-star-fill"></i><i class="ri-star-fill"></i></div>
+        </div>
+        <span id="ratingBadge" class="rating-badge">Новый аккаунт</span>
+
+        <div>
+          <div class="stat-row"><span>Выполнено заказов</span><span id="statDone" class="stat-value">0</span></div>
+          <div class="stat-row"><span>Получено отзывов</span><span id="statReviews" class="stat-value">0</span></div>
+          <div class="stat-row"><span>Успешно сданных</span><span id="statSuccess" class="stat-value">—</span></div>
+          <div class="stat-row"><span>Сданных вовремя</span><span id="statOnTime" class="stat-value">—</span></div>
+          <div class="stat-row"><span>Повторных заказов</span><span id="statRepeat" class="stat-value">—</span></div>
+        </div>
+      </div>
+
+      <div class="availability-card">
+        <h4>Доступность</h4>
+        <p id="availabilityText">Готов к новым проектам. Отвечаю быстро.</p>
+      </div>
+    </aside>
   </div>
-</main>
 
-{% block extra_head %}
-<link rel="stylesheet" href="{% static 'pages/css/account.css' %}">
-<script defer src="{% static 'pages/js/account.js' %}"></script>
-{% endblock %}
+  <!-- МОДАЛКА ПОРТФОЛИО -->
+  <div class="modal-overlay" id="portfolioModal">
+    <div class="modal-content">
+      <button class="modal-close" data-close><i class="ri-close-line"></i></button>
+
+      <div id="modalView">
+        <div class="modal-gallery">
+          <div class="gallery-slide active"><i class="ri-image-line"></i></div>
+          <div class="gallery-slide"><i class="ri-layout-line"></i></div>
+          <div class="gallery-slide"><i class="ri-palette-line"></i></div>
+
+          <div class="gallery-nav">
+            <button class="gallery-btn" data-slide="-1"><i class="ri-arrow-left-s-line"></i></button>
+            <button class="gallery-btn" data-slide="1"><i class="ri-arrow-right-s-line"></i></button>
+          </div>
+
+          <div class="gallery-indicators">
+            <span class="indicator active" data-goto="0"></span>
+            <span class="indicator" data-goto="1"></span>
+            <span class="indicator" data-goto="2"></span>
+          </div>
+        </div>
+
+        <div class="modal-body">
+          <h2 id="mTitle" class="modal-title">—</h2>
+          <div class="modal-meta">
+            <div class="modal-meta-item"><i class="ri-calendar-line"></i><span id="mDate">—</span></div>
+            <div class="modal-meta-item"><i class="ri-time-line"></i><span id="mDuration">—</span></div>
+            <div class="modal-meta-item"><i class="ri-eye-line"></i><span id="mViews">—</span></div>
+          </div>
+          <p id="mDesc" class="modal-description">—</p>
+          <div id="mTags" class="modal-tags"></div>
+        </div>
+
+        <div class="modal-footer">
+          <button class="project-nav-btn prev" data-project="-1"><i class="ri-arrow-left-line"></i>Предыдущий проект</button>
+          <div style="display:flex;gap:10px">
+            <button class="edit-btn" id="mEdit"><i class="ri-pencil-line"></i>Редактировать</button>
+            <button class="edit-btn" id="mDelete" style="border-color:#d32f2f;color:#d32f2f"><i class="ri-delete-bin-line"></i>Удалить</button>
+          </div>
+          <button class="project-nav-btn next" data-project="1">Следующий проект<i class="ri-arrow-right-line"></i></button>
+        </div>
+      </div>
+
+      <!-- РЕЖИМ РЕДАКТИРОВАНИЯ -->
+      <div id="modalEdit" style="display:none">
+        <div class="edit-form-container">
+          <h2 style="margin-bottom:24px">Редактировать проект</h2>
+          <form id="editForm">
+            <div class="form-group">
+              <label class="form-label">Название проекта</label>
+              <input id="eTitle" type="text" class="form-input" required>
+            </div>
+
+            <div class="form-group">
+              <label class="form-label">Описание</label>
+              <textarea id="eDesc" class="form-textarea" required></textarea>
+            </div>
+
+            <div class="form-row">
+              <div class="form-group">
+                <label class="form-label">Дата</label>
+                <input id="eDate" type="text" class="form-input" required>
+              </div>
+              <div class="form-group">
+                <label class="form-label">Длительность</label>
+                <input id="eDuration" type="text" class="form-input" required>
+              </div>
+            </div>
+
+            <div class="form-group">
+              <label class="form-label">Теги (Enter — добавить)</label>
+              <div id="tagsBox" class="tags-input-container">
+                <input id="tagInput" type="text" class="tag-input-field" placeholder="Добавить тег...">
+              </div>
+            </div>
+
+            <div class="form-actions">
+              <button type="button" class="btn btn-secondary" id="eCancel">Отмена</button>
+              <button type="submit" class="btn btn-primary">Сохранить</button>
+            </div>
+          </form>
+        </div>
+      </div>
+
+    </div>
+  </div>
 {% endblock %}
