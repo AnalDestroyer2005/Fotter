@@ -1,0 +1,168 @@
+{% extends "pages/base.html" %}
+{% load static %}
+{% block title %}Настройки — FOTTER{% endblock %}
+
+{% block extra_head %}
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/remixicon/4.6.0/remixicon.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="{% static 'pages/css/settings.css' %}">
+  <script defer src="{% static 'pages/js/settings.js' %}"></script>
+{% endblock %}
+
+{% block content %}
+<main class="container settings-layout">
+
+  <!-- Сайдбар -->
+  <aside>
+    <ul class="settings-menu">
+      <li class="menu-item active" data-section="profile">
+        <i class="ri-user-line"></i><span>Профиль</span>
+      </li>
+      <li class="menu-item" data-section="security">
+        <i class="ri-lock-line"></i><span>Безопасность</span>
+      </li>
+      <li class="menu-item" data-section="notifications">
+        <i class="ri-notification-line"></i><span>Уведомления</span>
+      </li>
+    </ul>
+  </aside>
+
+  <!-- Контент -->
+  <section class="content-area">
+
+    <!-- Профиль -->
+    <section class="settings-section active" id="profile">
+      <div class="section-top">
+        <h1>Профиль</h1>
+        <button type="button" class="btn btn-secondary" id="btn-edit-profile">
+          <i class="ri-pencil-line"></i> Редактировать
+        </button>
+      </div>
+
+      <!-- Аватар -->
+      <div class="form-section">
+        <div class="avatar-section">
+          <img
+            id="settings-avatar"
+            class="current-avatar"
+            data-default="{% static 'pages/img/avatar-default.svg' %}"
+            src="{% static 'pages/img/avatar-default.svg' %}"
+            alt="Аватар"
+          >
+          <div class="avatar-actions">
+            <input id="settings-avatar-input" type="file" accept="image/*" hidden>
+            <button type="button" class="btn btn-primary" id="settings-avatar-btn">
+              <i class="ri-upload-2-line"></i> Загрузить фото
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Основные данные -->
+      <div class="form-section">
+        <div class="form-grid">
+          <div class="form-group">
+            <label for="settings-name">Имя</label>
+            <input id="settings-name" type="text" placeholder="Ваше имя">
+          </div>
+          <div class="form-group">
+            <label for="settings-email">Email</label>
+            <input id="settings-email" type="email" placeholder="name@example.com">
+          </div>
+          <div class="form-group full-width">
+            <label for="settings-about">О себе</label>
+            <textarea id="settings-about" placeholder="Расскажите о себе..."></textarea>
+          </div>
+        </div>
+      </div>
+
+      <div class="form-actions">
+        <button type="button" class="btn btn-primary" id="btn-save-profile">Сохранить</button>
+        <button type="button" class="btn btn-secondary" id="btn-cancel-profile">Отмена</button>
+      </div>
+    </section>
+
+    <!-- Безопасность -->
+    <section class="settings-section" id="security">
+      <h1>Безопасность</h1>
+
+      <div class="form-section">
+        <div class="section-title">
+          <i class="ri-lock-password-line"></i> Изменить пароль
+        </div>
+        <div class="form-grid">
+          <div class="form-group full-width">
+            <label for="curr-pass">Текущий пароль</label>
+            <input id="curr-pass" type="password" placeholder="Введите текущий пароль">
+          </div>
+          <div class="form-group">
+            <label for="new-pass">Новый пароль</label>
+            <input id="new-pass" type="password" placeholder="Минимум 8 символов">
+          </div>
+          <div class="form-group">
+            <label for="rep-pass">Повторите пароль</label>
+            <input id="rep-pass" type="password" placeholder="Повторите новый пароль">
+          </div>
+        </div>
+      </div>
+
+      <div class="form-section">
+        <div class="section-title">
+          <i class="ri-smartphone-line"></i> Двухфакторная аутентификация
+        </div>
+        <div class="toggle-group">
+          <div class="toggle-info">
+            <div class="toggle-label">Включить 2FA</div>
+            <div class="toggle-description">Дополнительный уровень защиты</div>
+          </div>
+          <label class="toggle-switch">
+            <input type="checkbox" id="two-fa">
+            <span class="toggle-slider"></span>
+          </label>
+        </div>
+      </div>
+
+      <div class="form-actions">
+        <button class="btn btn-primary" type="button" id="btn-save-password">Сохранить</button>
+      </div>
+    </section>
+
+    <!-- Уведомления -->
+    <section class="settings-section" id="notifications">
+      <h1>Уведомления</h1>
+
+      <div class="form-section">
+        <div class="section-title">
+          <i class="ri-mail-line"></i> Email-уведомления
+        </div>
+
+        <div class="toggle-group">
+          <div class="toggle-info">
+            <div class="toggle-label">Новые заказы</div>
+            <div class="toggle-description">Получать письма и пуши о новых запросах</div>
+          </div>
+          <label class="toggle-switch">
+            <input type="checkbox" id="notify-orders" checked>
+            <span class="toggle-slider"></span>
+          </label>
+        </div>
+
+        <div class="toggle-group">
+          <div class="toggle-info">
+            <div class="toggle-label">Сообщения</div>
+            <div class="toggle-description">Уведомления о новых диалогах и откликах</div>
+          </div>
+          <label class="toggle-switch">
+            <input type="checkbox" id="notify-messages" checked>
+            <span class="toggle-slider"></span>
+          </label>
+        </div>
+      </div>
+
+      <div class="form-actions">
+        <button class="btn btn-primary" type="button">Сохранить</button>
+      </div>
+    </section>
+
+  </section>
+</main>
+{% endblock %}

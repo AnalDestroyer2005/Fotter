@@ -1,0 +1,86 @@
+{% extends "pages/base.html" %}
+{% load static %}
+{% block title %}{{ page_title }} — FOTTER{% endblock %}
+
+{% block extra_head %}
+  <link rel="stylesheet" href="{% static 'pages/css/listings.css' %}">
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/remixicon/4.6.0/remixicon.min.css" rel="stylesheet">
+  <script defer src="{% static 'pages/js/listings.js' %}"></script>
+{% endblock %}
+
+{% block content %}
+<div class="listings-wrap" data-current-user="{{ request.user.id|default:'' }}">
+
+  <!-- Сайдбар с фильтрами -->
+  <aside class="filters">
+    <div class="filter-card">
+      <div class="filter-header">
+        <i class="ri-equalizer-line"></i>
+        <span>Фильтры</span>
+      </div>
+
+      {% block filters %}{% endblock %}
+
+      <button id="apply-filters" class="btn btn-solid full">Применить</button>
+    </div>
+  </aside>
+
+  <!-- Контент -->
+  <main class="listing-main">
+    <div class="listing-head">
+      <div class="page-title-row">
+        <h1 class="page-title">{{ page_title }}</h1>
+        {% block page_actions %}{% endblock %}
+      </div>
+      <div class="search-area">
+        <div class="search-input-wrap">
+          <i class="ri-search-line search-icon"></i>
+          <input id="q" class="search-input" type="text" placeholder="{{ search_placeholder }}" value="{{ request.GET.search|default_if_none:'' }}">
+        </div>
+        <button id="do-search" class="btn btn-solid">Найти</button>
+      </div>
+
+      <div class="sort-bar">
+        <span>Сортировать по:</span>
+        <div class="sort-options" id="sort-options">
+            {% for value,label in sort_options %}
+              {% if request.GET.sort == value %}
+                <button class="sort-opt active" data-sort="{{ value }}">{{ label }}</button>
+              {% elif not request.GET.sort and forloop.first %}
+                <button class="sort-opt active" data-sort="{{ value }}">{{ label }}</button>
+              {% else %}
+                <button class="sort-opt" data-sort="{{ value }}">{{ label }}</button>
+              {% endif %}
+            {% endfor %}
+          </div>
+      </div>
+    </div>
+
+    <div class="items-grid">
+      {% block items %}{% endblock %}
+    </div>
+
+    {% if items.paginator.num_pages > 1 %}
+    <nav class="pagination">
+      {% if items.has_previous %}
+        <a class="page-item" href="{{ request.get_full_path|cut:'page='|cut:'&page=' }}{% if request.GET %}&{% endif %}page={{ items.previous_page_number }}">&lt;</a>
+      {% endif %}
+
+      {% for num in items.paginator.page_range %}
+        {% if num == items.number %}
+          <span class="page-item active">{{ num }}</span>
+        {% elif num >= items.number|add:'-2' and num <= items.number|add:'2' %}
+          <a class="page-item" href="{{ request.path }}?{% if request.GET %}{{ request.GET.urlencode|cut:'page='|cut:'&page=' }}&{% endif %}page={{ num }}">{{ num }}</a>
+        {% endif %}
+      {% endfor %}
+
+      {% if items.has_next %}
+        <a class="page-item" href="{{ request.path }}?{% if request.GET %}{{ request.GET.urlencode|cut:'page='|cut:'&page=' }}&{% endif %}page={{ items.next_page_number }}">&gt;</a>
+      {% endif %}
+    </nav>
+    {% endif %}
+  </main>
+
+</div>
+{% block extra_modals %}{% endblock %}
+{% endblock %}

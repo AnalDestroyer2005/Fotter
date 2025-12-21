@@ -197,6 +197,9 @@ nav a:hover {
   color: #2E7D32;
   font-weight: 600;
 }
+.online-status.offline {
+  color: #9E9E9E;
+}
 
 .awards-section {
   padding-top: 16px;
@@ -733,7 +736,9 @@ nav a:hover {
 }
 
 .tag {
+  position: relative;
   padding: 8px 16px;
+  padding-right: 28px;
   background: #F5F5F7;
   border-radius: 100px;
   font-size: 13px;
@@ -745,6 +750,22 @@ nav a:hover {
 .tag:hover {
   border-color: #CCC;
   background: #FFF;
+}
+.tag-remove {
+  position: absolute;
+  right: 6px;
+  top: 4px;
+  border: none;
+  background: transparent;
+  font-size: 14px;
+  line-height: 1;
+  padding: 2px 4px;
+  cursor: pointer;
+  color: #666;
+  display: none;
+}
+.is-editing .tag .tag-remove {
+  display: inline-flex;
 }
 
 /* Портфолио */

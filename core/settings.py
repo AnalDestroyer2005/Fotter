@@ -1,6 +1,10 @@
 from pathlib import Path
 import os
-from dotenv import load_dotenv
+try:
+    from dotenv import load_dotenv
+except ImportError:
+    def load_dotenv(*args, **kwargs):
+        return None
 from datetime import timedelta
 
 # Загружаем .env из корня проекта (где manage.py)
@@ -20,6 +24,7 @@ INSTALLED_APPS = [
     "django.contrib.sessions",
     "django.contrib.messages",
     "django.contrib.staticfiles",
+    "channels",
     "pages",
     "drf_spectacular",
     "drf_spectacular_sidecar",
@@ -30,6 +35,7 @@ INSTALLED_APPS = [
     # твои приложения
     "accounts",
     "projects",
+    "messaging",
 
     "django.contrib.postgres",
     "common",
@@ -71,6 +77,11 @@ TEMPLATES = [
 
 WSGI_APPLICATION = "core.wsgi.application"
 ASGI_APPLICATION = "core.asgi.application"
+CHANNEL_LAYERS = {
+    "default": {
+        "BACKEND": "channels.layers.InMemoryChannelLayer",
+    }
+}
 
 # --- БАЗА ДАННЫХ (PostgreSQL) ---
 DATABASES = {
@@ -89,6 +100,7 @@ CORS_ALLOW_ALL_ORIGINS = True
 REST_FRAMEWORK = {
     # JWT-авторизация для API
     "DEFAULT_AUTHENTICATION_CLASSES": (
+        "rest_framework.authentication.SessionAuthentication",
         "rest_framework_simplejwt.authentication.JWTAuthentication",
     ),
     # По умолчанию читать можно всем, изменять — только авторизованным
@@ -138,6 +150,7 @@ USE_TZ = True
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
 AUTH_USER_MODEL = "accounts.Account"
+LOGIN_URL = "/auth/login/"
 
 
 SIMPLE_JWT = {

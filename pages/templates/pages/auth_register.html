@@ -1,34 +1,59 @@
 {% extends "pages/base.html" %}
-
 {% load static %}
 
 {% block title %}Регистрация — Fotter{% endblock %}
 
-{% block content %}
+{% block extra_head %}
 <link rel="stylesheet" href="{% static 'pages/css/auth.css' %}">
+{% endblock %}
+
+{% block content %}
 <div class="auth-wrap">
   <div class="auth-card">
     <h1>Регистрация</h1>
+    
     <form id="form-register" class="stack">
       <label class="field">
         <span class="label">Имя пользователя</span>
-        <input id="reg-username" autocomplete="username" required>
+        <input 
+          id="reg-username" 
+          type="text"
+          placeholder="Придумайте логин"
+          autocomplete="username" 
+          required
+        >
       </label>
+
       <label class="field">
         <span class="label">Email</span>
-        <input id="reg-email" type="email" autocomplete="email" required>
+        <input 
+          id="reg-email" 
+          type="email"
+          placeholder="your@email.com"
+          autocomplete="email" 
+          required
+        >
       </label>
+
       <label class="field">
         <span class="label">Пароль</span>
-        <input id="reg-password" type="password" autocomplete="new-password" minlength="6" required>
+        <input 
+          id="reg-password" 
+          type="password"
+          placeholder="Минимум 6 символов"
+          autocomplete="new-password" 
+          minlength="6" 
+          required
+        >
       </label>
 
-      <div class="row space-between">
-        <button type="submit" class="btn btn-primary">Создать аккаунт</button>
-        <a class="muted" href="/auth/login/">Уже есть аккаунт? Войти</a>
-      </div>
-
       <div id="reg-hint" class="hint"></div>
+
+      <button type="submit" class="btn btn-primary">Создать аккаунт</button>
+
+      <div class="auth-footer">
+        Уже есть аккаунт? <a href="{% url 'login' %}">Войти</a>
+      </div>
     </form>
   </div>
 </div>

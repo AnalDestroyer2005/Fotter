@@ -1,0 +1,243 @@
+{% extends "pages/base.html" %}
+{% load static %}
+
+{% block title %}Сообщения — Fotter{% endblock %}
+
+{% block extra_head %}
+  <link rel="stylesheet" href="{% static 'pages/css/messages.css' %}">
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/remixicon/4.6.0/remixicon.min.css" rel="stylesheet">
+  <script defer src="{% static 'pages/js/messages.js' %}"></script>
+{% endblock %}
+
+{% block content %}
+<div class="messages-container"
+     data-user-id="{{ request.user.id }}"
+     data-active-chat="{{ active_chat_id|default:'' }}">
+  <!-- Left Panel: Chat List -->
+  <aside class="chat-list-panel" id="chatListPanel">
+    <div class="panel-header">
+      <h2 class="panel-title">Сообщения</h2>
+      <button class="mobile-back-btn" id="backToChats" style="display: none;">
+        <i class="ri-arrow-left-line"></i>
+      </button>
+    </div>
+
+    <div class="search-wrapper">
+      <i class="ri-search-line search-icon"></i>
+      <input type="text" class="search-input" placeholder="Поиск чатов..." id="chatSearch">
+    </div>
+
+    <div class="chat-tabs">
+      <button class="chat-tab active" data-tab="all">Все</button>
+      <button class="chat-tab" data-tab="unread">Непрочитанные</button>
+      <button class="chat-tab" data-tab="archive">Архив</button>
+    </div>
+
+    <div class="chats-list" id="chatsList">
+      {% for chat in chats %}
+      <div class="chat-item {% if chat.id == active_chat_id %}active{% endif %}"
+           data-chat-id="{{ chat.id }}"
+           data-partner-id="{{ chat.partner.id }}"
+           data-user-name="{{ chat.partner.get_full_name }}"
+           data-user-avatar="{% if chat.partner.avatar %}{{ chat.partner.avatar.url }}{% endif %}"
+           data-user-spec="{{ chat.partner.specialization|default:'Исполнитель' }}"
+           data-user-rating="{{ chat.partner.rating|default:'5.0' }}"
+           data-user-reviews="{{ chat.partner.reviews_count|default:0 }}">
+        <div class="avatar-wrapper">
+        {% if chat.partner.avatar %}
+          <img src="{{ chat.partner.avatar.url }}" alt="{{ chat.partner.get_full_name }}" class="avatar">
+        {% else %}
+          <div class="avatar">
+            {{ chat.partner.initials|default:chat.partner.username|first|upper }}
+          </div>
+        {% endif %}
+          {% if chat.partner.is_online %}
+          <span class="status-dot"></span>
+          {% endif %}
+        </div>
+        <div class="chat-info">
+          <div class="chat-header">
+            <span class="chat-name">{{ chat.partner.get_full_name }}</span>
+            <span class="chat-time">{{ chat.last_message.created_at|date:"H:i" }}</span>
+          </div>
+          <div class="chat-preview">
+            <span class="last-msg">{{ chat.last_message.text|truncatechars:50 }}</span>
+            {% if chat.unread_count > 0 %}
+            <span class="unread-badge">{{ chat.unread_count }}</span>
+            {% endif %}
+          </div>
+        </div>
+      </div>
+      {% empty %}
+      <div class="empty-state">
+        <i class="ri-chat-3-line"></i>
+        <p>Нет сообщений</p>
+      </div>
+      {% endfor %}
+    </div>
+  </aside>
+
+  <!-- Center Panel: Active Chat -->
+  <section class="chat-main-panel" id="chatMainPanel">
+    {% if active_chat %}
+    <div class="chat-header">
+      <button class="mobile-menu-btn" id="openChatList">
+        <i class="ri-arrow-left-line"></i>
+      </button>
+      <div class="chat-user-info">
+        {% if active_chat.partner.avatar %}
+          <img src="{{ active_chat.partner.avatar.url }}" alt="{{ active_chat.partner.get_full_name }}" class="avatar">
+        {% else %}
+          <div class="avatar">
+            {{ active_chat.partner.initials|default:active_chat.partner.username|first|upper }}
+          </div>
+        {% endif %}
+        <div class="user-info-text">
+          <span class="user-name">{{ active_chat.partner.get_full_name }}</span>
+          <span class="user-status {% if active_chat.partner.is_online %}online{% endif %}">
+            {{ active_chat.partner.is_online|yesno:"онлайн,оффлайн" }}
+          </span>
+        </div>
+      </div>
+      <div class="chat-actions">
+        <button class="action-btn" id="toggleInfo" aria-label="Информация">
+          <i class="ri-information-line"></i>
+        </button>
+        <button class="action-btn" aria-label="Ещё">
+          <i class="ri-more-2-fill"></i>
+        </button>
+      </div>
+    </div>
+
+    <div class="messages-area" id="messagesArea">
+      {% for message in messages %}
+      <div class="msg-row {% if message.sender == request.user %}user{% else %}partner{% endif %}">
+        <div class="msg-bubble">
+          {{ message.text }}
+          <span class="msg-time">{{ message.created_at|date:"H:i" }}</span>
+        </div>
+      </div>
+      {% empty %}
+      <div class="empty-state">
+        <i class="ri-message-3-line"></i>
+        <p>Начните общение</p>
+      </div>
+      {% endfor %}
+    </div>
+
+    <form class="message-input-area" id="messageForm">
+      <button type="button" class="input-icon-btn" aria-label="Прикрепить файл">
+        <i class="ri-attachment-2"></i>
+      </button>
+      <div class="input-wrapper">
+        <input type="text"
+               class="message-input"
+               placeholder="Написать сообщение..."
+               id="messageInput"
+               name="text"
+               required>
+        <button type="button" class="input-icon-btn" aria-label="Эмодзи">
+          <i class="ri-emotion-line"></i>
+        </button>
+      </div>
+      <button type="submit" class="send-btn" aria-label="Отправить">
+        <i class="ri-send-plane-fill"></i>
+      </button>
+    </form>
+    {% else %}
+    <div class="empty-chat-state">
+      <i class="ri-chat-3-line"></i>
+      <h3>Выберите чат</h3>
+      <p>Выберите беседу из списка слева</p>
+    </div>
+    {% endif %}
+  </section>
+
+  <!-- Right Panel: Chat Info -->
+  <aside class="chat-info-panel" id="chatInfoPanel">
+    {% if active_chat %}
+    <div class="info-header">
+      <h3>Информация</h3>
+      <button class="close-info-btn" id="closeInfo">
+        <i class="ri-close-line"></i>
+      </button>
+    </div>
+
+    <div class="user-profile-card">
+      {% if active_chat.partner.avatar %}
+        <img src="{{ active_chat.partner.avatar.url }}" alt="{{ active_chat.partner.get_full_name }}" class="profile-avatar">
+      {% else %}
+        <div class="profile-avatar">
+          {{ active_chat.partner.initials|default:active_chat.partner.username|first|upper }}
+        </div>
+      {% endif %}
+      <h4 class="profile-name">{{ active_chat.partner.get_full_name }}</h4>
+      <p class="profile-spec">{{ active_chat.partner.specialization|default:"Исполнитель" }}</p>
+      <div class="profile-rating">
+        {{ active_chat.partner.rating|default:"5.0" }}
+        <i class="ri-star-fill"></i>
+        <span>({{ active_chat.partner.reviews_count|default:0 }} отзывов)</span>
+      </div>
+      <a href="/account/?user={{ active_chat.partner.id }}" class="btn-view-profile">
+        Перейти в профиль
+      </a>
+    </div>
+
+    {% if active_chat.project %}
+    <div class="info-section">
+      <h4 class="section-title">О проекте</h4>
+      <div class="info-item">
+        <span class="info-label">Название</span>
+        <span class="info-value">{{ active_chat.project.title }}</span>
+      </div>
+      <div class="info-item">
+        <span class="info-label">Бюджет</span>
+        <span class="info-value">{{ active_chat.project.budget|floatformat:0 }} ₽</span>
+      </div>
+      <div class="info-item">
+        <span class="info-label">Срок</span>
+        <span class="info-value">{{ active_chat.project.deadline }}</span>
+      </div>
+      <div class="info-item">
+        <span class="info-label">Статус</span>
+        <span class="status-badge">{{ active_chat.project.get_status_display }}</span>
+      </div>
+    </div>
+    {% endif %}
+
+    {% if active_chat.files.exists %}
+    <div class="info-section">
+      <h4 class="section-title">Общие файлы</h4>
+      <div class="files-list">
+        {% for file in active_chat.files.all %}
+        <div class="file-item">
+          <div class="file-icon">
+            <i class="ri-file-{{ file.icon }}-line"></i>
+          </div>
+          <div class="file-info">
+            <span class="file-name">{{ file.name }}</span>
+            <span class="file-size">{{ file.size|filesizeformat }}</span>
+          </div>
+          <a href="{{ file.url }}" download class="file-download">
+            <i class="ri-download-line"></i>
+          </a>
+        </div>
+        {% endfor %}
+      </div>
+    </div>
+    {% endif %}
+
+    <div class="info-actions">
+      <button class="info-action-btn">
+        <i class="ri-archive-line"></i>
+        Архивировать чат
+      </button>
+      <button class="info-action-btn danger">
+        <i class="ri-prohibited-line"></i>
+        Заблокировать пользователя
+      </button>
+    </div>
+    {% endif %}
+  </aside>
+</div>
+{% endblock %}

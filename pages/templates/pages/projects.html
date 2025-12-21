@@ -1,28 +1,133 @@
-{% extends "pages/base.html" %}
-{% load static %}
-{% block title %}Главная — Fotter{% endblock %}
+{% extends "pages/listing_base.html" %}
 
-{% block content %}
-<main class="wrap">
-  <aside class="sidebar">
-    <h3>Категории</h3>
-    <nav id="cat-list" class="cat-list">
-      <!-- Категории подставятся из /api/categories/ -->
-      <a class="cat active" href="#" data-id="">Все</a>
-    </nav>
-  </aside>
+{% block filters %}
+  <div class="filter-section">
+    <div class="filter-title">Бюджет (₽)</div>
+    <div class="range-inputs">
+      <input class="range-input" name="budget_min" type="number" placeholder="От" value="{{ request.GET.budget_min }}">
+      <input class="range-input" name="budget_max" type="number" placeholder="До" value="{{ request.GET.budget_max }}">
+    </div>
+  </div>
 
-  <section class="content">
-    <div id="spinner" style="display:none">Загрузка…</div>
-    <div id="error" class="error" style="display:none"></div>
+  <div class="filter-section">
+    <div class="filter-title">Срок</div>
+    <div class="filter-list" id="f-deadline">
+      <label class="filter-item"><input type="radio" name="deadline" value="" {% if not request.GET.deadline %}checked{% endif %}><span>Любой</span></label>
+      <label class="filter-item"><input type="radio" name="deadline" value="7"  {% if request.GET.deadline == '7'  %}checked{% endif %}><span>до 7 дней</span></label>
+      <label class="filter-item"><input type="radio" name="deadline" value="14" {% if request.GET.deadline == '14' %}checked{% endif %}><span>до 14 дней</span></label>
+      <label class="filter-item"><input type="radio" name="deadline" value="30" {% if request.GET.deadline == '30' %}checked{% endif %}><span>до 30 дней</span></label>
+    </div>
+  </div>
 
-    <!-- сетка карточек: под твои классы cards1/card1 -->
-    <div id="projects-grid" class="cards1"></div>
+  <div class="filter-section">
+    <div class="filter-title">Навыки</div>
+    <div class="filter-list" id="f-skills">
+      {% for sk in skills %}
+      <label class="filter-item">
+        <input type="checkbox" name="skills" value="{{ sk.name }}" {% if sk.name in selected_skills %}checked{% endif %}>
+        <span>{{ sk.name }}</span>
+      </label>
+      {% endfor %}
+    </div>
+  </div>
+{% endblock %}
 
-    <div id="pagination" class="pager"></div>
-  </section>
-</main>
 
-<!-- Скрипт подгрузки проектов/категорий -->
-<script defer src="{% static 'pages/js/projects.js' %}"></script>
+{% block page_actions %}
+  <button class="btn btn-solid" id="btncreate" type="button">Создать+</button>
+{% endblock %}
+
+{% block items %}
+  {% for p in items %}
+  <article class="card project-card" data-project-id="{{ p.id }}" data-owner-id="{{ p.owner_id|default_if_none:'' }}">
+    <div class="card-header">
+      <h3 class="project-title">{{ p.title }}</h3>
+      <div class="project-budget">
+        {% if p.budget_min and p.budget_max %}
+          {{ p.budget_min|floatformat:0 }}–{{ p.budget_max|floatformat:0 }} ₽
+        {% elif p.budget_min %}
+          от {{ p.budget_min|floatformat:0 }} ₽
+        {% elif p.budget_max %}
+          до {{ p.budget_max|floatformat:0 }} ₽
+        {% else %}
+          Бюджет не указан
+        {% endif %}
+      </div>
+    </div>
+
+    <div class="meta-tags">
+      {% if p.deadline %}<span class="tag"><i class="ri-time-line"></i>{{ p.deadline }} дн.</span>{% endif %}
+      {% if p.is_open %}<span class="tag ok"><i class="ri-checkbox-circle-line"></i>Открыт</span>{% else %}<span class="tag"><i class="ri-lock-line"></i>Закрыт</span>{% endif %}
+    </div>
+
+    <p class="description">{{ p.description|truncatechars:220 }}</p>
+
+    <div class="card-footer">
+      <div class="footer-info">
+        <span><i class="ri-calendar-check-line"></i>{{ p.created_at|timesince }} назад</span>
+        {% if p.skills %}<span><i class="ri-stackshare-line"></i>{{ p.skills|join:", " }}</span>{% endif %}
+      </div>
+      {% if p.owner_id %}
+        {% if request.user.is_authenticated and request.user.id == p.owner_id %}
+          <div class="actions"><span class="action-hint">Ваш проект</span></div>
+        {% else %}
+          <div class="actions">
+            <button class="action-btn outline btn-apply" type="button">Отклик</button>
+            <a class="action-btn outline btn-chat" href="#" style="display:none;">Чат</a>
+          </div>
+        {% endif %}
+      {% else %}
+        <div class="actions"><span class="action-hint">Нет владельца, чат недоступен</span></div>
+      {% endif %}
+    </div>
+  </article>
+  {% empty %}
+    <p class="empty">Проекты не найдены. Измени фильтры или запрос.</p>
+  {% endfor %}
+{% endblock %}
+
+{% block extra_modals %}
+<div class="modal-overlay" id="projectModal">
+  <div class="modal-content">
+    <button class="modal-close" data-close><i class="ri-close-line"></i></button>
+    <h2 style="margin-bottom:16px">Создать проект</h2>
+    <form id="projectForm" class="project-form">
+      <div class="form-group">
+        <label class="form-label">Название проекта</label>
+        <input id="pTitle" type="text" class="form-input" required>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Описание</label>
+        <textarea id="pDesc" class="form-textarea" rows="4" required></textarea>
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label class="form-label">Бюджет от (₽)</label>
+          <input id="pBudgetMin" type="number" class="form-input" min="0">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Бюджет до (₽)</label>
+          <input id="pBudgetMax" type="number" class="form-input" min="0">
+        </div>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Навыки (через запятую)</label>
+        <input id="pSkills" type="text" class="form-input" placeholder="Django, React, Figma" list="skillsList">
+        <datalist id="skillsList">
+          {% for sk in skills %}
+            <option value="{{ sk.name }}">
+          {% endfor %}
+        </datalist>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Срок (дней, опционально)</label>
+        <input id="pDeadline" type="number" class="form-input" min="1" placeholder="Например, 14">
+      </div>
+      <div class="form-actions" style="display:flex;gap:10px;justify-content:flex-end;">
+        <button type="button" class="btn btn-secondary" data-close>Отмена</button>
+        <button type="submit" class="btn btn-primary">Создать</button>
+      </div>
+    </form>
+  </div>
+</div>
 {% endblock %}

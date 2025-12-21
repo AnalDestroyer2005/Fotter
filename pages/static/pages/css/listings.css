@@ -1,0 +1,796 @@
+/* ===== БАЗА ===== */
+:root {
+    --bg: #f9f9fb;
+    --card: #fff;
+    --text: #111;
+    --muted: #666;
+    --line: #e6e6ea;
+    --black: #000;
+    --ok: #10b981;
+    --shadow: 0 10px 24px rgba(0, 0, 0, .06);
+    --r: 12px;
+}
+
+.listings-wrap {
+    max-width: 1200px;
+    margin: 32px auto 80px;
+    padding: 0 20px;
+    display: flex;
+    gap: 28px;
+    align-items: flex-start;
+    /* выравнивание по верхнему краю */
+}
+
+/* ===== Сайдбар ===== */
+.filters {
+    width: 280px;
+    flex: 0 0 280px;
+}
+
+.filter-card {
+    background: var(--card);
+    border: 1px solid var(--line);
+    border-radius: var(--r);
+    padding: 18px;
+    position: sticky;
+    top: 100px;
+    box-shadow: var(--shadow);
+}
+
+.filter-header {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-weight: 700;
+    margin-bottom: 14px;
+    font-size: 16px;
+}
+
+/* modal for project creation */
+#projectModal {
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.45);
+    display: none;
+    align-items: center;
+    justify-content: center;
+    z-index: 2000;
+}
+#projectModal.active {
+    display: flex;
+}
+#projectModal .modal-content {
+    background: #fff;
+    border-radius: 14px;
+    padding: 20px;
+    width: min(640px, 92vw);
+    position: relative;
+    box-shadow: 0 18px 40px rgba(0,0,0,0.2);
+}
+#projectModal .modal-close {
+    position: absolute;
+    top: 12px;
+    right: 12px;
+    background: transparent;
+    border: none;
+    font-size: 20px;
+    cursor: pointer;
+}
+#projectModal .form-group {
+    margin-bottom: 14px;
+}
+#projectModal .form-label {
+    display: block;
+    font-weight: 600;
+    margin-bottom: 6px;
+}
+#projectModal .form-input,
+#projectModal .form-textarea {
+    width: 100%;
+    border: 1px solid var(--line);
+    border-radius: 10px;
+    padding: 10px 12px;
+    font-size: 15px;
+    box-sizing: border-box;
+}
+#projectModal .form-textarea {
+    min-height: 120px;
+    resize: vertical;
+}
+#projectModal .form-row {
+    display: grid;
+    grid-template-columns: repeat(auto-fit,minmax(220px,1fr));
+    gap: 12px;
+}
+
+.filter-section {
+    padding: 14px 0;
+    border-top: 1px solid var(--line);
+}
+
+.filter-section:first-of-type {
+    border-top: 0;
+    padding-top: 0;
+}
+
+.filter-title {
+    font-weight: 600;
+    margin-bottom: 12px;
+    font-size: 14px;
+    color: var(--text);
+}
+
+.filter-list {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.filter-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    cursor: pointer;
+    font-size: 14px;
+    color: var(--text);
+    transition: color 0.2s;
+}
+
+.filter-item:hover {
+    color: var(--black);
+}
+
+.filter-item input {
+    accent-color: #111;
+    cursor: pointer;
+}
+
+/* Инпуты для диапазона */
+.range-inputs {
+    display: flex;
+    gap: 10px;
+}
+
+.range-input {
+    width: 100%;
+    padding: 8px 10px;
+    border: 1px solid var(--line);
+    border-radius: 8px;
+    font-size: 14px;
+    outline: none;
+    transition: border-color 0.3s, box-shadow 0.3s;
+}
+
+.range-input:focus {
+    border-color: #000;
+    box-shadow: 0 0 0 3px rgba(0, 0, 0, 0.05);
+}
+
+.range-input::placeholder {
+    color: #999;
+}
+
+/* ===== Контент ===== */
+.listing-main {
+    flex: 1;
+    min-width: 0;
+    padding-top: 0;
+}
+
+.listing-head {
+    margin-bottom: 20px;
+}
+
+/* Заголовок + кнопка создать */
+.page-title-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 16px;
+}
+
+.page-title {
+    margin: 0;
+    font-size: 32px;
+    font-weight: 800;
+    color: var(--text);
+}
+
+/* Кнопка "Создать+" */
+.btn-create {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    height: 42px;
+    padding: 0 20px;
+    background: #111;
+    color: #fff;
+    border: none;
+    border-radius: 10px;
+    font-weight: 600;
+    font-size: 15px;
+    cursor: pointer;
+    text-decoration: none;
+    transition: all 0.3s;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+}
+
+.btn-create:hover {
+    background: #000;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.25);
+}
+
+.btn-create i {
+    font-size: 18px;
+}
+
+/* Поиск */
+.search-area {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 16px;
+}
+
+.search-input-wrap {
+    position: relative;
+    flex: 1;
+}
+
+.search-icon {
+    position: absolute;
+    left: 14px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: #999;
+    font-size: 18px;
+}
+
+.search-input {
+    width: 100%;
+    padding: 11px 14px 11px 42px;
+    border: 1px solid var(--line);
+    border-radius: var(--r);
+    outline: none;
+    font-size: 15px;
+    transition: border-color 0.3s, box-shadow 0.3s;
+}
+
+.search-input:focus {
+    border-color: #000;
+    box-shadow: 0 0 0 3px rgba(0, 0, 0, 0.05);
+}
+
+/* Сортировка */
+.sort-bar {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    color: var(--muted);
+    font-size: 14px;
+    margin-bottom: 18px;
+}
+
+.sort-options {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+}
+
+.sort-opt {
+    border: 1px solid var(--line);
+    background: #fff;
+    border-radius: 999px;
+    padding: 6px 14px;
+    cursor: pointer;
+    font-size: 13px;
+    font-weight: 500;
+    transition: all 0.2s;
+}
+
+.sort-opt:hover {
+    border-color: #111;
+    background: #f9f9f9;
+}
+
+.sort-opt.active {
+    background: #111;
+    color: #fff;
+    border-color: #111;
+}
+
+/* ===== Карточки ===== */
+.items-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 20px;
+    margin-top: 18px;
+}
+
+.card {
+    background: var(--card);
+    border: 1px solid var(--line);
+    border-radius: var(--r);
+    padding: 20px;
+    box-shadow: var(--shadow);
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.card:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 12px 30px rgba(0, 0, 0, 0.1);
+}
+
+/* === Проекты === */
+.project-card .card-header {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 12px;
+}
+
+.project-title {
+    font-size: 18px;
+    font-weight: 700;
+    margin: 0;
+    flex: 1;
+    line-height: 1.4;
+    color: var(--text);
+}
+
+.project-budget {
+    font-size: 17px;
+    font-weight: 700;
+    white-space: nowrap;
+    color: var(--black);
+}
+
+.meta-tags {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+}
+
+.tag {
+    background: #f4f4f6;
+    color: #555;
+    border-radius: 999px;
+    padding: 5px 10px;
+    font-size: 12px;
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    font-weight: 500;
+}
+
+.tag i {
+    font-size: 13px;
+}
+
+.tag.ok {
+    background: #ebfffa;
+    color: #0a7b5b;
+}
+
+.description {
+    color: var(--muted);
+    margin: 4px 0 8px;
+    font-size: 14px;
+    line-height: 1.6;
+}
+
+.card-footer {
+    margin-top: auto;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    border-top: 1px solid #f0f0f2;
+    padding-top: 12px;
+    gap: 10px;
+}
+
+.footer-info {
+    display: flex;
+    gap: 14px;
+    color: #999;
+    font-size: 13px;
+    flex-wrap: wrap;
+}
+
+.footer-info span {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+}
+
+.footer-info i {
+    font-size: 14px;
+}
+
+/* === Исполнители === */
+.freelancer-card .card-header {
+    display: flex;
+    gap: 14px;
+}
+
+.avatar-wrap {
+    position: relative;
+}
+
+.avatar {
+    width: 72px;
+    height: 72px;
+    border-radius: 50%;
+    object-fit: cover;
+    background: #eee;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 700;
+    font-size: 24px;
+    color: #666;
+}
+
+.status-dot {
+    position: absolute;
+    right: 2px;
+    bottom: 2px;
+    width: 14px;
+    height: 14px;
+    border-radius: 50%;
+    border: 2px solid #fff;
+}
+
+.status-online {
+    background: var(--ok);
+}
+
+.status-offline {
+    background: #ccc;
+}
+
+.info {
+    flex: 1;
+    min-width: 0;
+}
+
+.name-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 4px;
+}
+
+.name {
+    font-size: 18px;
+    font-weight: 700;
+    margin: 0;
+    color: var(--text);
+}
+
+.rate-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    background: #f3f4f6;
+    padding: 4px 10px;
+    border-radius: 999px;
+    font-size: 13px;
+    font-weight: 600;
+}
+
+.rate-badge i {
+    color: #F59E0B;
+    font-size: 14px;
+}
+
+.spec {
+    font-size: 14px;
+    margin-bottom: 2px;
+}
+
+.status {
+    font-size: 13px;
+}
+
+.muted {
+    color: var(--muted);
+}
+
+/* === Кнопки / пагинация === */
+.btn {
+    height: 40px;
+    padding: 0 16px;
+    border-radius: 10px;
+    border: 1px solid #111;
+    background: #111;
+    color: #fff;
+    font-weight: 600;
+    cursor: pointer;
+    font-size: 14px;
+    transition: all 0.3s;
+}
+
+.btn:hover {
+    background: #000;
+    transform: translateY(-1px);
+}
+
+.btn.btn-solid.full {
+    width: 100%;
+    margin-top: 8px;
+}
+
+.action-btn {
+    border-radius: 8px;
+    padding: 8px 16px;
+    border: 1px solid #111;
+    font-weight: 600;
+    cursor: pointer;
+    font-size: 14px;
+    text-decoration: none;
+    display: inline-block;
+    transition: all 0.3s;
+}
+
+.action-btn.outline {
+    background: #fff;
+    color: #111;
+}
+
+.action-btn.outline:hover {
+    background: #111;
+    color: #fff;
+}
+
+.action-btn.solid {
+    background: #111;
+    color: #fff;
+    border-color: #111;
+}
+
+.action-btn.solid:hover {
+    background: #000;
+}
+
+/* Пагинация */
+.pagination {
+    display: flex;
+    justify-content: center;
+    gap: 8px;
+    margin-top: 30px;
+}
+
+.page-item {
+    width: 40px;
+    height: 40px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 8px;
+    border: 1px solid var(--line);
+    text-decoration: none;
+    color: var(--text);
+    font-weight: 500;
+    transition: all 0.2s;
+}
+
+.page-item.active,
+.page-item:hover {
+    background: #111;
+    color: #fff;
+    border-color: #111;
+}
+
+/* Пустое состояние */
+.empty {
+    text-align: center;
+    color: var(--muted);
+    padding: 80px 20px;
+    font-size: 15px;
+    grid-column: 1 / -1;
+    /* растянуть на всю ширину сетки */
+}
+
+/* ===== Мобильная кнопка фильтров ===== */
+.mobile-filter-toggle {
+    display: none;
+    width: 100%;
+    padding: 12px;
+    background: #111;
+    color: #fff;
+    border: none;
+    border-radius: 10px;
+    font-weight: 600;
+    font-size: 15px;
+    cursor: pointer;
+    margin-bottom: 16px;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+}
+
+.mobile-filter-toggle i {
+    font-size: 18px;
+}
+
+/* Оверлей для мобильных фильтров */
+.filter-overlay {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.5);
+    z-index: 998;
+}
+
+.filter-overlay.show {
+    display: block;
+}
+
+/* ===== АДАПТИВ ===== */
+
+/* Планшеты */
+@media (max-width: 1024px) {
+    .listings-wrap {
+        gap: 24px;
+    }
+
+    .filters {
+        width: 240px;
+        flex: 0 0 240px;
+    }
+
+    .items-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .page-title {
+        font-size: 28px;
+    }
+}
+
+/* Мобильные устройства */
+@media (max-width: 768px) {
+    .listings-wrap {
+        padding: 0 15px;
+    }
+
+    /* Показать кнопку фильтров */
+    .mobile-filter-toggle {
+        display: flex;
+    }
+
+    /* Фильтры как боковая панель */
+    .filters {
+        position: fixed;
+        top: 0;
+        left: -100%;
+        width: 85%;
+        max-width: 320px;
+        height: 100vh;
+        background: var(--bg);
+        z-index: 999;
+        transition: left 0.3s ease;
+        overflow-y: auto;
+        padding: 20px 15px;
+    }
+
+    .filters.show {
+        left: 0;
+    }
+
+    .filter-card {
+        position: static;
+        box-shadow: none;
+    }
+
+    /* Кнопка закрытия фильтров */
+    .filter-close {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        margin-bottom: 16px;
+        padding-bottom: 12px;
+        border-bottom: 1px solid var(--line);
+    }
+
+    .filter-close button {
+        background: transparent;
+        border: none;
+        font-size: 24px;
+        cursor: pointer;
+        padding: 0;
+        color: var(--text);
+    }
+
+    .page-title-row {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 12px;
+    }
+
+    .page-title {
+        font-size: 24px;
+    }
+
+    .btn-create {
+        width: 100%;
+        justify-content: center;
+    }
+
+    .search-area {
+        flex-direction: column;
+    }
+
+    .items-grid {
+        gap: 16px;
+    }
+
+    .card {
+        padding: 16px;
+    }
+
+    .project-card .card-header {
+        flex-direction: column;
+        gap: 8px;
+    }
+
+    .project-budget {
+        align-self: flex-start;
+    }
+
+    .card-footer {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 12px;
+    }
+
+    .action-btn {
+        width: 100%;
+        text-align: center;
+    }
+}
+
+/* Очень маленькие экраны */
+@media (max-width: 480px) {
+    .page-title {
+        font-size: 22px;
+    }
+
+    .freelancer-card .card-header {
+        flex-direction: column;
+        align-items: center;
+        text-align: center;
+    }
+
+    .avatar-wrap {
+        margin: 0 auto;
+    }
+
+    .name-row {
+        flex-direction: column;
+        gap: 8px;
+    }
+
+    .footer-info {
+        flex-direction: column;
+        gap: 8px;
+    }
+}
+
+
+
+
+
+
+
+
+
+#btncreate {
+    padding-top: 8px;
+    background-color: white;
+    color: #000;
+}

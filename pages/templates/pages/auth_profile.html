@@ -10,12 +10,20 @@
 
 {% block content %}
   <!-- Основной контейнер страницы аккаунта -->
-  <div class="main-container account" data-username="{{ request.user.username|default:'' }}">
+  <div class="main-container account"
+       data-username="{{ request.user.username|default:'' }}"
+       data-user-id="{{ request.user.id|default:'' }}">
 
     <!-- ЛЕВАЯ КОЛОНКА -->
     <aside class="left-col">
       <div class="profile-card">
-        <div id="accAvatar" class="profile-avatar-large"></div>
+        <div class="avatar-wrapper">
+          <div id="accAvatar" class="profile-avatar-large"></div>
+          <label class="avatar-upload-btn">
+            <input id="accAvatarInput" type="file" accept="image/*" hidden>
+            <i class="ri-upload-line"></i> Загрузить
+          </label>
+        </div>
         <h2 id="accName" class="profile-name">—</h2>
 
         <div class="verification-badge">
@@ -34,10 +42,10 @@
           </div>
         </div>
 
-        <div class="awards-section">
-          <div class="award-icon" title="Надёжный исполнитель"><i class="ri-medal-line"></i></div>
-          <div class="award-icon" title="Быстрый ответ"><i class="ri-flashlight-line"></i></div>
-          <div class="award-icon" title="Выбор редакции"><i class="ri-trophy-line"></i></div>
+        <div class="awards-section" id="accAwards">
+          <div class="award-icon" title="Награды появятся позже"><i class="ri-medal-line"></i></div>
+          <div class="award-icon" title="Награды появятся позже"><i class="ri-flashlight-line"></i></div>
+          <div class="award-icon" title="Награды появятся позже"><i class="ri-trophy-line"></i></div>
         </div>
       </div>
     </aside>
@@ -165,8 +173,18 @@
       </div>
 
       <div class="availability-card">
-        <h4>Доступность</h4>
-        <p id="availabilityText">Готов к новым проектам. Отвечаю быстро.</p>
+        <div class="section-title" style="margin:0 0 8px; display:flex; align-items:center; justify-content:space-between;">
+          <h4 style="margin:0;">Обо мне</h4>
+          <button type="button" class="edit-btn" id="bioEditBtn"><i class="ri-pencil-line"></i>Редактировать</button>
+        </div>
+        <p id="availabilityText" class="bio-text">Информация пока не заполнена.</p>
+        <div id="bioEditBox" class="bio-edit" style="display:none; gap:8px; flex-direction:column;">
+          <textarea id="bioInput" class="form-textarea" rows="4" placeholder="Расскажите о себе..."></textarea>
+          <div style="display:flex; gap:8px; justify-content:flex-end;">
+            <button type="button" class="btn btn-secondary" id="bioCancel">Отмена</button>
+            <button type="button" class="btn btn-primary" id="bioSave">Сохранить</button>
+          </div>
+        </div>
       </div>
     </aside>
   </div>
