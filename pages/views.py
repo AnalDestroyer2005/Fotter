@@ -6,7 +6,6 @@ from django.db.models import Q, F, Prefetch, Count, Max
 from projects.models import Project, Order
 from taxonomy.models import Category, UserSkill, Skill
 from accounts.models import Account
-from messaging.models import Chat, Message
 
 
 # ---------- Статичные страницы ----------
@@ -51,65 +50,14 @@ def account_page(request):
 account_hub = account_page
 
 
-# ---------- Сообщения (заглушка контекста) ----------
+# ---------- Сообщения (бэк отключен, оставляем только разметку) ----------
 @login_required
 def messages_page(request):
-    user = request.user
-    chat_id = request.GET.get("chat")
-    project_param = request.GET.get("project")
-
-    # Автосоздание чата по проекту из кнопки "Чат"
-    if project_param and user.is_authenticated:
-        from projects.models import Project
-
-        try:
-            project = Project.objects.get(id=project_param)
-        except Project.DoesNotExist:
-            project = None
-
-        if project and project.owner and project.owner_id != user.id:
-            chat = (
-                Chat.objects.filter(project_id=project.id, participants=user)
-                .filter(participants=project.owner)
-                .first()
-            )
-            if not chat:
-                chat = Chat.objects.create(project=project)
-                chat.participants.set([user, project.owner])
-            return redirect(f"/messages/?chat={chat.id}")
-
-    chats = (
-        Chat.objects.filter(participants=user)
-        .prefetch_related("participants")
-        .annotate(last_msg_created=Max("messages__created_at"))
-        .order_by("-last_msg_created", "-updated_at")
-    )
-
-    active_chat = None
-    if chat_id:
-        active_chat = chats.filter(id=chat_id).first()
-    if not active_chat:
-        active_chat = chats.first()
-
-    messages_qs = Message.objects.none()
-    if active_chat:
-        messages_qs = (
-            Message.objects.filter(chat=active_chat)
-            .select_related("sender")
-            .order_by("created_at")
-        )
-        Message.objects.filter(chat=active_chat, is_read=False).exclude(sender=user).update(is_read=True)
-
-    for chat in chats:
-        chat.partner = chat.participants.exclude(id=user.id).first()
-        chat.last_message = chat.messages.order_by("-created_at").first()
-        chat.unread_count = chat.messages.filter(is_read=False).exclude(sender=user).count()
-
     ctx = {
-        "chats": chats,
-        "messages": messages_qs,
-        "active_chat": active_chat,
-        "active_chat_id": active_chat.id if active_chat else None,
+        "chats": [],
+        "messages": [],
+        "active_chat": None,
+        "active_chat_id": None,
     }
     return render(request, "pages/messages.html", ctx)
 

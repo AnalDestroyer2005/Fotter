@@ -1,8 +1,8 @@
-{% extends "pages/listing_base.html" %}
+﻿{% extends "pages/listing_base.html" %}
 
 {% block filters %}
   <div class="filter-section">
-    <div class="filter-title">Навыки</div>
+    <div class="filter-title">РќР°РІС‹РєРё</div>
     <div class="filter-list" id="f-skills">
       {% for sk in skills %}
       <label class="filter-item">
@@ -16,7 +16,7 @@
 
 {% block items %}
   {% for f in items %}
-  <article class="card freelancer-card">
+  <article class="card freelancer-card" data-user-id="{{ f.id }}">
     <div class="card-header">
       <div class="avatar-wrap">
         {% if f.avatar %}<img class="avatar" src="{{ f.avatar.url }}" alt="">
@@ -28,7 +28,7 @@
           <h3 class="name">{{ f.first_name }} {{ f.last_name }}</h3>
           <div class="rate-badge"><i class="ri-star-fill"></i>{{ f.rating|default:5.0 }}</div>
         </div>
-        <div class="status muted">{% if f.is_online %}Сейчас онлайн{% else %}Был(а) {{ f.last_login|timesince }} назад{% endif %}</div>
+        <div class="status muted">{% if f.is_online %}РЎРµР№С‡Р°СЃ РѕРЅР»Р°Р№РЅ{% else %}Р‘С‹Р»(Р°) {{ f.last_login|timesince }} РЅР°Р·Р°Рґ{% endif %}</div>
       </div>
     </div>
 
@@ -40,13 +40,13 @@
 
     <div class="card-footer">
       <div class="footer-info">
-        <span><i class="ri-briefcase-line"></i>{{ f.portfolio_count|default:0 }} проектов</span>
-        <span><i class="ri-check-line"></i>{{ f.completed_orders|default:0 }} заказов</span>
+        <span><i class="ri-briefcase-line"></i>{{ f.portfolio_count|default:0 }} РїСЂРѕРµРєС‚РѕРІ</span>
+        <span><i class="ri-check-line"></i>{{ f.completed_orders|default:0 }} Р·Р°РєР°Р·РѕРІ</span>
       </div>
-      <a href="#" class="action-btn solid">Связаться</a>
+      <a href="#" class="action-btn solid btn-contact">РЎРІСЏР·Р°С‚СЊСЃСЏ</a>
     </div>
   </article>
   {% empty %}
-    <p class="empty">Исполнители не найдены. Измени фильтры или запрос.</p>
+    <p class="empty">РСЃРїРѕР»РЅРёС‚РµР»Рё РЅРµ РЅР°Р№РґРµРЅС‹. РР·РјРµРЅРё С„РёР»СЊС‚СЂС‹ РёР»Рё Р·Р°РїСЂРѕСЃ.</p>
   {% endfor %}
 {% endblock %}

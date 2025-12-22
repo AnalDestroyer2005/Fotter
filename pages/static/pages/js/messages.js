@@ -1,299 +1,135 @@
-// Realtime chat (Channels/WebSocket)
 (() => {
-  const chatListPanel = document.getElementById('chatListPanel');
-  const chatMainPanel = document.getElementById('chatMainPanel');
-  const chatInfoPanel = document.getElementById('chatInfoPanel');
-  const messagesArea = document.getElementById('messagesArea');
-  const messageForm = document.getElementById('messageForm');
-  const messageInput = document.getElementById('messageInput');
-  const chatSearch = document.getElementById('chatSearch');
-  const openChatListBtn = document.getElementById('openChatList');
-  const backToChatsBtn = document.getElementById('backToChats');
-  const toggleInfoBtn = document.getElementById('toggleInfo');
-  const closeInfoBtn = document.getElementById('closeInfo');
-  const root = document.querySelector('.messages-container');
+  const container = document.querySelector(".messages-container");
+  if (!container) return;
 
-  let isMobile = window.innerWidth <= 768;
-  const currentUserId = Number(root?.dataset.userId || 0);
-  let activeChatId = root?.dataset.activeChat || null;
-  let socket = null;
+  const qs = (s, root = document) => root.querySelector(s);
+  const qsa = (s, root = document) => Array.from(root.querySelectorAll(s));
+  const currentUserId = Number(container.dataset.userId || 0);
+  const url = new URL(window.location.href);
+  const chatFromUrl = Number(url.searchParams.get("chat") || container.dataset.activeChat || 0) || null;
+  const API = {
+    chats: "/api/chats/",
+    messages: (chatId) => `/api/messages/?chat=${chatId}`,
+    sendMessage: "/api/messages/",
+    markRead: (chatId) => `/api/chats/${chatId}/mark_read/`,
+  };
 
-  function init() {
-    setupEventListeners();
-    setupChatSwitching();
-    setupSearch();
-    if (activeChatId) {
-      connectSocket(activeChatId);
-      scrollToBottom();
-    }
-    checkMobileState();
-  }
+  const state = {
+    chats: [],
+    activeChatId: chatFromUrl,
+    socket: null,
+  };
 
-  function setupEventListeners() {
-    if (messageForm) {
-      messageForm.addEventListener('submit', handleSendMessage);
-    }
-    openChatListBtn?.addEventListener('click', showChatList);
-    backToChatsBtn?.addEventListener('click', showChatList);
-    toggleInfoBtn?.addEventListener('click', toggleInfoPanel);
-    closeInfoBtn?.addEventListener('click', () => chatInfoPanel?.classList.remove('open'));
+  const chatListEl = qs("#chatsList");
+  const chatMainPanel = qs("#chatMainPanel");
+  const chatInfoPanel = qs("#chatInfoPanel");
 
-    document.querySelectorAll('.chat-tab').forEach(tab => {
-      tab.addEventListener('click', () => {
-        document.querySelectorAll('.chat-tab').forEach(t => t.classList.remove('active'));
-        tab.classList.add('active');
-        filterChats(tab.dataset.tab);
-      });
-    });
-
-    window.addEventListener('resize', checkMobileState);
-    document.addEventListener('keydown', handleKeyboard);
-  }
-
-  function setupChatSwitching() {
-    document.querySelectorAll('.chat-item').forEach(item => {
-      item.addEventListener('click', async () => {
-        const chatId = item.dataset.chatId;
-        await switchChat(chatId, item);
-        if (isMobile) {
-          chatListPanel?.classList.add('hidden');
-          chatMainPanel?.classList.add('active');
-        }
-      });
-    });
-  }
-
-  async function switchChat(chatId, itemNode) {
-    if (!chatId) return;
-    activeChatId = chatId;
-    document.querySelectorAll('.chat-item').forEach(item => item.classList.remove('active'));
-    const activeNode = itemNode || document.querySelector(`[data-chat-id="${chatId}"]`);
-    activeNode?.classList.add('active');
-    fillHeaderFromItem(activeNode);
-    await loadMessages(chatId);
-    await markChatRead(chatId);
-    connectSocket(chatId);
-    scrollToBottom();
-  }
-
-  function fillHeaderFromItem(item) {
-    if (!item) return;
-    const name = item.dataset.userName || '';
-    const avatar = item.dataset.userAvatar || '';
-    const header = chatMainPanel?.querySelector('.chat-user-info');
-    if (!header) return;
-    const avatarEl = header.querySelector('.avatar');
-    if (avatarEl && avatar) {
-      avatarEl.innerHTML = `<img src="${avatar}" alt="${name}" class="avatar">`;
-    } else if (avatarEl) {
-      avatarEl.textContent = (name || '?').slice(0, 1).toUpperCase();
-    }
-    const nameEl = header.querySelector('.user-name');
-    if (nameEl) nameEl.textContent = name;
-  }
-
-  function connectSocket(chatId) {
-    if (!chatId) return;
-    if (socket) {
-      socket.close();
-      socket = null;
-    }
-    const scheme = window.location.protocol === 'https:' ? 'wss' : 'ws';
-    socket = new WebSocket(`${scheme}://${window.location.host}/ws/chat/${chatId}/`);
-
-    socket.onmessage = (event) => {
-      try {
-        const data = JSON.parse(event.data);
-        appendMessage({
-          senderId: data.sender?.id || data.sender_id,
-          text: data.text,
-          time: formatTime(data.created_at),
-        });
-        updateChatPreview(chatId, data.text, data.created_at);
-      } catch (err) {
-        console.error('WS parse error', err);
-      }
-    };
-
-    socket.onclose = () => {
-      // socket will reconnect on next send or switch
-    };
-  }
-
-  async function handleSendMessage(e) {
-    e.preventDefault();
-    const text = messageInput.value.trim();
-    if (!text || !activeChatId) return;
-    const payload = { text };
-
-    // Try WebSocket first
-    if (socket && socket.readyState === WebSocket.OPEN) {
-      socket.send(JSON.stringify(payload));
-      appendMessage({
-        senderId: currentUserId,
-        text,
-        time: formatTime(new Date().toISOString()),
-      });
-      messageInput.value = '';
-      scrollToBottom();
-      updateChatPreview(activeChatId, text);
-      return;
+  function ensureLayout() {
+    if (chatMainPanel && !qs("#messageForm", chatMainPanel)) {
+      chatMainPanel.innerHTML = `
+        <div class="chat-header" id="chatHeader">
+          <button class="mobile-menu-btn" id="openChatList">
+            <i class="ri-arrow-left-line"></i>
+          </button>
+          <div class="chat-user-info">
+            <div class="avatar" id="chatAvatar"></div>
+            <div class="user-info-text">
+              <span class="user-name" id="chatUserName"></span>
+              <span class="user-status" id="chatUserStatus"></span>
+            </div>
+          </div>
+          <div class="chat-actions">
+            <button class="action-btn" id="toggleInfo" aria-label="info">
+              <i class="ri-information-line"></i>
+            </button>
+          </div>
+        </div>
+        <div class="messages-area" id="messagesArea"></div>
+        <div class="empty-chat-state" id="emptyChatState">
+          <i class="ri-chat-3-line"></i>
+          <h3>Выберите чат</h3>
+          <p>Начните диалог, чтобы обсудить проект.</p>
+        </div>
+        <form class="message-input-area" id="messageForm">
+          <button type="button" class="input-icon-btn" aria-label="attach">
+            <i class="ri-attachment-2"></i>
+          </button>
+          <div class="input-wrapper">
+            <input type="text"
+                   class="message-input"
+                   placeholder="Напишите сообщение..."
+                   id="messageInput"
+                   name="text"
+                   required>
+            <button type="button" class="input-icon-btn" aria-label="emoji">
+              <i class="ri-emotion-line"></i>
+            </button>
+          </div>
+          <button type="submit" class="send-btn" aria-label="send">
+            <i class="ri-send-plane-fill"></i>
+          </button>
+        </form>
+      `;
     }
 
-    // Fallback to HTTP
-    try {
-      const response = await fetch(`/api/messages/`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'X-CSRFToken': getCookie('csrftoken'),
-        },
-        body: JSON.stringify({ chat: activeChatId, text }),
-      });
-      if (response.ok) {
-        appendMessage({
-          senderId: currentUserId,
-          text,
-          time: formatTime(new Date().toISOString()),
-        });
-        messageInput.value = '';
-        scrollToBottom();
-        updateChatPreview(activeChatId, text);
-      }
-    } catch (error) {
-      console.error('Failed to send message:', error);
+    if (chatInfoPanel && !chatInfoPanel.children.length) {
+      chatInfoPanel.innerHTML = `
+        <div class="info-header">
+          <h3>Информация</h3>
+          <button class="close-info-btn" id="closeInfo">
+            <i class="ri-close-line"></i>
+          </button>
+        </div>
+        <div class="user-profile-card">
+          <div class="profile-avatar" id="infoAvatar"></div>
+          <h4 class="profile-name" id="infoName"></h4>
+          <p class="profile-spec" id="infoBio"></p>
+          <a href="#" class="btn-view-profile" id="infoProfileLink" target="_blank" rel="noreferrer">
+            Открыть профиль
+          </a>
+        </div>
+        <div class="info-section" id="infoProjectSection" style="display:none;">
+          <h4 class="section-title">Проект</h4>
+          <div class="info-item">
+            <span class="info-label">ID</span>
+            <span class="info-value" id="infoProjectId"></span>
+          </div>
+        </div>
+      `;
     }
   }
 
-  async function loadMessages(chatId) {
-    if (!messagesArea || !chatId) return;
-    messagesArea.innerHTML = '';
-    try {
-      const res = await fetch(`/api/messages/?chat=${chatId}`);
-      if (!res.ok) return;
-      const data = await res.json();
-      data.forEach(msg => {
-        appendMessage({
-          senderId: msg.sender?.id,
-          text: msg.text,
-          time: formatTime(msg.created_at),
-        });
-      });
-      scrollToBottom();
-    } catch (err) {
-      console.error('loadMessages error', err);
-    }
-  }
+  ensureLayout();
 
-  async function markChatRead(chatId) {
-    try {
-      await fetch(`/api/chats/${chatId}/mark_read/`, {
-        method: 'POST',
-        headers: { 'X-CSRFToken': getCookie('csrftoken') },
-      });
-      const badge = document.querySelector(`[data-chat-id="${chatId}"] .unread-badge`);
-      if (badge) badge.remove();
-    } catch (err) {
-      console.warn('mark read failed', err);
-    }
-  }
+  const messageForm = qs("#messageForm");
+  const messageInput = qs("#messageInput");
+  const messagesArea = qs("#messagesArea");
+  const emptyChatState = qs("#emptyChatState");
+  const chatHeader = qs("#chatHeader");
+  const chatAvatar = qs("#chatAvatar");
+  const chatUserName = qs("#chatUserName");
+  const chatUserStatus = qs("#chatUserStatus");
+  const infoAvatar = qs("#infoAvatar");
+  const infoName = qs("#infoName");
+  const infoBio = qs("#infoBio");
+  const infoProfileLink = qs("#infoProfileLink");
+  const infoProjectSection = qs("#infoProjectSection");
+  const infoProjectId = qs("#infoProjectId");
 
-  function appendMessage({ senderId, text, time }) {
-    if (!messagesArea) return;
-    const msgRow = document.createElement('div');
-    const side = senderId === currentUserId ? 'user' : 'partner';
-    msgRow.className = `msg-row ${side}`;
-    const msgBubble = document.createElement('div');
-    msgBubble.className = 'msg-bubble';
-    msgBubble.innerHTML = `
-      ${text}
-      <span class="msg-time">${time || ''}</span>
-    `;
-    msgRow.appendChild(msgBubble);
-    messagesArea.appendChild(msgRow);
-  }
+  toggleEmptyState(!!state.activeChatId);
 
-  function updateChatPreview(chatId, text, timeOverride) {
-    const chatItem = document.querySelector(`[data-chat-id="${chatId}"]`);
-    if (!chatItem) return;
-    const lastMsg = chatItem.querySelector('.last-msg');
-    if (lastMsg) {
-      lastMsg.textContent = text.length > 50 ? text.substring(0, 50) + '...' : text;
-    }
-    const chatTime = chatItem.querySelector('.chat-time');
-    if (chatTime) {
-      chatTime.textContent = timeOverride ? formatTime(timeOverride) : new Date().toLocaleTimeString('ru-RU', { hour: '2-digit', minute: '2-digit' });
-    }
-  }
-
-  function setupSearch() {
-    chatSearch?.addEventListener('input', (e) => {
-      const query = e.target.value.toLowerCase();
-      document.querySelectorAll('.chat-item').forEach(item => {
-        const name = item.querySelector('.chat-name')?.textContent.toLowerCase() || '';
-        const lastMsg = item.querySelector('.last-msg')?.textContent.toLowerCase() || '';
-        item.style.display = (name.includes(query) || lastMsg.includes(query)) ? 'flex' : 'none';
-      });
-    });
-  }
-
-  function filterChats(tab) {
-    const items = document.querySelectorAll('.chat-item');
-    items.forEach(item => {
-      switch(tab) {
-        case 'unread':
-          item.style.display = item.querySelector('.unread-badge') ? 'flex' : 'none';
-          break;
-        case 'archive':
-          item.style.display = 'none';
-          break;
-        default:
-          item.style.display = 'flex';
-      }
-    });
-  }
-
-  function showChatList() {
-    if (!isMobile) return;
-    chatListPanel?.classList.remove('hidden');
-    chatMainPanel?.classList.remove('active');
-  }
-
-  function toggleInfoPanel() {
-    if (isMobile || window.innerWidth <= 1200) {
-      chatInfoPanel?.classList.toggle('open');
-    }
-  }
-
-  function checkMobileState() {
-    const wasMobile = isMobile;
-    isMobile = window.innerWidth <= 768;
-    if (wasMobile && !isMobile) {
-      chatListPanel?.classList.remove('hidden');
-      chatMainPanel?.classList.remove('active');
-      chatInfoPanel?.classList.remove('open');
-    }
-  }
-
-  function handleKeyboard(e) {
-    if (e.key === 'Escape') {
-      chatInfoPanel?.classList.remove('open');
-    }
-  }
-
-  function scrollToBottom() {
-    if (messagesArea) {
-      messagesArea.scrollTop = messagesArea.scrollHeight;
-    }
+  function authHeader() {
+    const token = localStorage.getItem("access_token");
+    return token ? { Authorization: `Bearer ${token}` } : {};
   }
 
   function getCookie(name) {
     let cookieValue = null;
-    if (document.cookie && document.cookie !== '') {
-      const cookies = document.cookie.split(';');
+    if (document.cookie && document.cookie !== "") {
+      const cookies = document.cookie.split(";");
       for (let i = 0; i < cookies.length; i++) {
         const cookie = cookies[i].trim();
-        if (cookie.substring(0, name.length + 1) === (name + '=')) {
+        if (cookie.substring(0, name.length + 1) === name + "=") {
           cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
           break;
         }
@@ -302,18 +138,314 @@
     return cookieValue;
   }
 
-  function formatTime(value) {
+  function formatTime(dt) {
+    const d = new Date(dt);
+    if (Number.isNaN(d.getTime())) return "";
+    return d.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
+  }
+
+  function buildAvatar(partner, size = 36) {
+    if (partner?.avatar) {
+      return `<img src="${partner.avatar}" alt="${partner.username || ""}" class="avatar" style="width:${size}px;height:${size}px;">`;
+    }
+    const letter = (partner?.first_name || partner?.username || "?").slice(0, 1).toUpperCase();
+    return `<div class="avatar" style="width:${size}px;height:${size}px;display:flex;align-items:center;justify-content:center;">${letter}</div>`;
+  }
+
+  function partnerOf(chat) {
+    return chat.partner || chat.participants?.find((p) => p.id !== currentUserId) || {};
+  }
+
+  async function loadChats() {
     try {
-      const d = new Date(value);
-      return d.toLocaleTimeString('ru-RU', { hour: '2-digit', minute: '2-digit' });
-    } catch (e) {
-      return '';
+      const res = await fetch(API.chats, { headers: authHeader() });
+      if (!res.ok) throw new Error("chats_load_failed");
+      state.chats = await res.json();
+      if (!state.activeChatId && state.chats.length) {
+        state.activeChatId = state.chats[0].id;
+      }
+      renderChats();
+      if (state.activeChatId) {
+        await selectChat(state.activeChatId, { skipListRender: true });
+      }
+    } catch (err) {
+      console.error("Failed to load chats", err);
+      if (chatsListEl) {
+        chatsListEl.innerHTML = `<div class="empty-state"><i class="ri-alert-line"></i><p>Не удалось загрузить чаты</p></div>`;
+      }
     }
   }
 
-  if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', init);
-  } else {
-    init();
+  function renderChats() {
+    if (!chatListEl) return;
+    chatListEl.innerHTML = "";
+    if (!state.chats.length) {
+      chatListEl.innerHTML = `
+        <div class="empty-state">
+          <i class="ri-chat-3-line"></i>
+          <p>Сообщений пока нет</p>
+        </div>`;
+      return;
+    }
+    state.chats.forEach((chat) => {
+      const partner = partnerOf(chat);
+      const item = document.createElement("div");
+      item.className = "chat-item" + (chat.id === state.activeChatId ? " active" : "");
+      item.dataset.chatId = chat.id;
+      item.innerHTML = `
+        <div class="avatar-wrapper">
+          ${buildAvatar(partner, 40)}
+        </div>
+        <div class="chat-info">
+          <div class="chat-header">
+            <span class="chat-name">${partner.first_name || partner.username || "Без имени"}</span>
+            <span class="chat-time">${chat.last_message?.created_at ? formatTime(chat.last_message.created_at) : ""}</span>
+          </div>
+          <div class="chat-preview">
+            <span class="last-msg">${chat.last_message?.text || ""}</span>
+            ${chat.unread_count ? `<span class="unread-badge">${chat.unread_count}</span>` : ""}
+          </div>
+        </div>
+      `;
+      item.addEventListener("click", () => selectChat(chat.id));
+      chatListEl.appendChild(item);
+    });
   }
+
+  async function selectChat(chatId, opts = {}) {
+    state.activeChatId = chatId;
+    if (!opts.skipListRender) renderChats();
+    await loadMessages(chatId);
+    openSocket(chatId);
+    toggleEmptyState(true);
+  }
+
+  function toggleEmptyState(hasChat) {
+    if (!emptyChatState) return;
+    if (hasChat) {
+      emptyChatState.style.display = "none";
+      messageForm?.classList.remove("disabled");
+      messageInput?.removeAttribute("disabled");
+    } else {
+      emptyChatState.style.display = "";
+      messageInput?.setAttribute("disabled", "true");
+    }
+  }
+
+  async function loadMessages(chatId) {
+    if (!messagesArea) return;
+    messagesArea.innerHTML = `<div class="empty-state"><i class="ri-loader-2-line"></i><p>Загрузка...</p></div>`;
+    try {
+      const res = await fetch(API.messages(chatId), { headers: authHeader() });
+      if (!res.ok) throw new Error("messages_load_failed");
+      const data = await res.json();
+      renderMessages(data);
+      await markRead(chatId);
+      const chat = state.chats.find((c) => c.id === chatId);
+      if (chat) {
+        chat.unread_count = 0;
+        renderActiveChatInfo(chat);
+      }
+      renderChats();
+    } catch (err) {
+      console.error("Failed to load messages", err);
+      messagesArea.innerHTML = `<div class="empty-state"><i class="ri-alert-line"></i><p>Не удалось загрузить сообщения</p></div>`;
+    }
+  }
+
+  function renderMessages(list) {
+    if (!messagesArea) return;
+    messagesArea.innerHTML = "";
+    if (!list.length) {
+      messagesArea.innerHTML = `
+        <div class="empty-state">
+          <i class="ri-message-3-line"></i>
+          <p>Сообщений пока нет</p>
+        </div>`;
+      return;
+    }
+    list.forEach((m) => {
+      const row = document.createElement("div");
+      row.className = "msg-row " + (m.sender?.id === currentUserId ? "user" : "partner");
+      row.innerHTML = `
+        <div class="msg-bubble">
+          ${escapeHtml(m.text)}
+          <span class="msg-time">${formatTime(m.created_at)}</span>
+        </div>`;
+      messagesArea.appendChild(row);
+    });
+    messagesArea.scrollTop = messagesArea.scrollHeight;
+  }
+
+  function escapeHtml(str) {
+    return (str || "").replace(/[&<>"']/g, (c) => {
+      const map = { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" };
+      return map[c] || c;
+    });
+  }
+
+  async function markRead(chatId) {
+    try {
+      await fetch(API.markRead(chatId), {
+        method: "POST",
+        headers: {
+          "X-CSRFToken": getCookie("csrftoken"),
+          ...authHeader(),
+        },
+        credentials: "include",
+      });
+    } catch (err) {
+      console.warn("markRead failed", err);
+    }
+  }
+
+  function openSocket(chatId) {
+    if (state.socket) {
+      state.socket.onmessage = null;
+      state.socket.close();
+    }
+    const proto = window.location.protocol === "https:" ? "wss" : "ws";
+    const ws = new WebSocket(`${proto}://${window.location.host}/ws/chat/${chatId}/`);
+    ws.onmessage = (event) => {
+      try {
+        const data = JSON.parse(event.data);
+        if (data.type === "chat.message") {
+          handleIncomingMessage(data);
+        }
+      } catch (err) {
+        console.error("WS parse error", err);
+      }
+    };
+    ws.onclose = () => {
+      state.socket = null;
+    };
+    state.socket = ws;
+  }
+
+  function handleIncomingMessage(payload) {
+    const chatId = Number(payload.chat);
+    const chat = state.chats.find((c) => c.id === chatId);
+    if (chat) {
+      chat.last_message = {
+        text: payload.text,
+        sender_id: payload.sender?.id,
+        created_at: payload.created_at,
+      };
+      if (chatId !== state.activeChatId && payload.sender?.id !== currentUserId) {
+        chat.unread_count = (chat.unread_count || 0) + 1;
+      }
+    }
+    if (chatId === state.activeChatId) {
+      appendMessage(payload);
+      markRead(chatId);
+    }
+    state.chats.sort((a, b) => {
+      const ta = a.last_message?.created_at || a.updated_at || "";
+      const tb = b.last_message?.created_at || b.updated_at || "";
+      return ta < tb ? 1 : -1;
+    });
+    renderChats();
+  }
+
+  function appendMessage(msg) {
+    if (!messagesArea) return;
+    const row = document.createElement("div");
+    row.className = "msg-row " + (msg.sender?.id === currentUserId ? "user" : "partner");
+    row.innerHTML = `
+      <div class="msg-bubble">
+        ${escapeHtml(msg.text)}
+        <span class="msg-time">${formatTime(msg.created_at)}</span>
+      </div>`;
+    messagesArea.appendChild(row);
+    messagesArea.scrollTop = messagesArea.scrollHeight;
+  }
+
+  async function sendMessage(text) {
+    if (!text || !state.activeChatId) return;
+    const payload = { text: text.trim() };
+    if (!payload.text) return;
+
+    if (state.socket && state.socket.readyState === WebSocket.OPEN) {
+      state.socket.send(JSON.stringify(payload));
+      return;
+    }
+
+    try {
+      const res = await fetch(API.sendMessage, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "X-CSRFToken": getCookie("csrftoken"),
+          ...authHeader(),
+        },
+        credentials: "include",
+        body: JSON.stringify({ chat: state.activeChatId, text: payload.text }),
+      });
+      if (!res.ok) throw new Error("send_failed");
+      const msg = await res.json();
+      appendMessage(msg);
+    } catch (err) {
+      console.error("Failed to send message", err);
+      alert("Не удалось отправить сообщение");
+    }
+  }
+
+  function renderActiveChatInfo(chat) {
+    const partner = partnerOf(chat);
+    if (chatAvatar) {
+      chatAvatar.innerHTML = buildAvatar(partner, 40);
+    }
+    if (chatUserName) {
+      chatUserName.textContent = partner.first_name || partner.username || "Без имени";
+    }
+    if (chatUserStatus) {
+      chatUserStatus.textContent = "Онлайн";
+    }
+    if (infoAvatar) {
+      infoAvatar.innerHTML = buildAvatar(partner, 72);
+    }
+    if (infoName) infoName.textContent = partner.first_name || partner.username || "";
+    if (infoBio) infoBio.textContent = partner.bio || "";
+    if (infoProfileLink) {
+      infoProfileLink.href = partner.id ? `/account/?user=${partner.id}` : "#";
+    }
+    if (infoProjectSection && infoProjectId) {
+      if (chat.project) {
+        infoProjectSection.style.display = "";
+        infoProjectId.textContent = chat.project;
+      } else {
+        infoProjectSection.style.display = "none";
+      }
+    }
+  }
+
+  messageForm?.addEventListener("submit", (e) => {
+    e.preventDefault();
+    const val = messageInput?.value || "";
+    messageInput.value = "";
+    sendMessage(val);
+  });
+
+  qs("#toggleInfo")?.addEventListener("click", () => {
+    chatInfoPanel?.classList.toggle("open");
+  });
+  qs("#closeInfo")?.addEventListener("click", () => {
+    chatInfoPanel?.classList.remove("open");
+  });
+  qs("#openChatList")?.addEventListener("click", () => {
+    qs("#chatListPanel")?.classList.toggle("open");
+  });
+  qs("#backToChats")?.addEventListener("click", () => {
+    qs("#chatListPanel")?.classList.add("open");
+  });
+
+  qs("#chatSearch")?.addEventListener("input", (e) => {
+    const term = e.target.value.toLowerCase();
+    qsa(".chat-item", chatListEl).forEach((item) => {
+      const name = item.querySelector(".chat-name")?.textContent.toLowerCase() || "";
+      item.style.display = name.includes(term) ? "" : "none";
+    });
+  });
+
+  loadChats();
 })();

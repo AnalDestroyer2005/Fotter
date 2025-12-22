@@ -3,7 +3,7 @@ document.addEventListener("DOMContentLoaded", () => {
   const qs = (s, r = document) => r.querySelector(s);
   const qsa = (s, r = document) => Array.from(r.querySelectorAll(s));
   const container = qs(".listings-wrap");
-  const currentUserId = container?.dataset.currentUser || "";
+  const currentUserId = Number(container?.dataset.currentUser || 0);
 
   function buildParams() {
     const url = new URL(location.href);
@@ -42,6 +42,103 @@ document.addEventListener("DOMContentLoaded", () => {
 
     p.delete("page");
     return p.toString();
+  }
+
+  async function fetchExistingChat(ownerId, projectId) {
+    try {
+      const token = localStorage.getItem("access_token");
+      const res = await fetch("/api/chats/", {
+        headers: {
+          ...(token ? { Authorization: `Bearer ${token}` } : {}),
+        },
+        credentials: "include",
+      });
+      if (!res.ok) return null;
+      const chats = await res.json();
+      const byProject = chats.find((c) => Number(c.project) === Number(projectId) && c.partner?.id === ownerId);
+      if (byProject) return byProject;
+      return chats.find((c) => c.partner?.id === ownerId) || null;
+    } catch (err) {
+      console.warn("fallback chats load failed", err);
+      return null;
+    }
+  }
+
+  async function startChat(projectId, ownerId) {
+    if (!currentUserId) {
+      window.location.href = "/auth/login/?next=" + encodeURIComponent(location.pathname + location.search);
+      return;
+    }
+    if (!ownerId) {
+      alert("Не удалось определить собеседника.");
+      return;
+    }
+
+    // Try to reuse an existing chat first to avoid backend errors.
+    const existingFirst = await fetchExistingChat(ownerId, projectId);
+    if (existingFirst?.id) {
+      window.location.href = `/messages/?chat=${existingFirst.id}`;
+      return;
+    }
+
+    try {
+      const token = localStorage.getItem("access_token");
+      const res = await fetch("/api/chats/", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "X-CSRFToken": getCookie("csrftoken"),
+          ...(token ? { Authorization: `Bearer ${token}` } : {}),
+        },
+        credentials: "include",
+        body: JSON.stringify({ project: projectId, participant_id: ownerId }),
+      });
+      if (res.ok) {
+        const data = await res.json();
+        window.location.href = `/messages/?chat=${data.id}`;
+        return;
+      }
+      const existing = await fetchExistingChat(ownerId, projectId);
+      if (existing?.id) {
+        window.location.href = `/messages/?chat=${existing.id}`;
+        return;
+      }
+      const errText = await res.text().catch(() => "");
+      throw new Error(`chat_create_failed_${res.status}_${errText}`);
+    } catch (err) {
+      console.error("Failed to start chat", err);
+      alert("Не удалось открыть чат. Попробуйте позже.");
+    }
+  }
+
+  function initProjectChatButtons() {
+    if (!container || !currentUserId) return;
+    qsa(".project-card", container).forEach((card) => {
+      const ownerId = Number(card.dataset.ownerId || 0);
+      const projectId = Number(card.dataset.projectId || 0);
+      const btn = qs(".btn-chat", card);
+      if (!btn || !ownerId || ownerId === Number(currentUserId)) return;
+      btn.style.display = "inline-flex";
+      btn.textContent = "Написать";
+      btn.addEventListener("click", (e) => {
+        e.preventDefault();
+        startChat(projectId, ownerId);
+      });
+    });
+  }
+
+  function initFreelancerChatButtons() {
+    if (!container || !currentUserId) return;
+    qsa(".freelancer-card", container).forEach((card) => {
+      const targetId = Number(card.dataset.userId || 0);
+      const btn = qs(".btn-contact", card) || qs(".action-btn.solid", card);
+      if (!btn || !targetId || targetId === currentUserId) return;
+      btn.textContent = "Связаться";
+      btn.addEventListener("click", (e) => {
+        e.preventDefault();
+        startChat(null, targetId);
+      });
+    });
   }
 
   // sort buttons
@@ -128,84 +225,8 @@ document.addEventListener("DOMContentLoaded", () => {
     });
   }
 
-  // Apply -> show chat btn
-  qsa(".btn-apply").forEach((btn) => {
-    btn.addEventListener("click", (e) => {
-      e.preventDefault();
-      const card = btn.closest(".card");
-      const chat = card?.querySelector(".btn-chat");
-      const projectId = card?.dataset.projectId;
-      const ownerId = card?.dataset.ownerId;
-       // запрет отклика на свой проект
-      if (ownerId && currentUserId && ownerId === currentUserId) {
-        btn.disabled = true;
-        return;
-      }
-      if (!ownerId) {
-        btn.disabled = true;
-        return;
-      }
-      if (chat) {
-        chat.style.display = "";
-        chat.href = projectId ? `/messages/?project=${projectId}` : "/messages/";
-        chat.dataset.ownerId = ownerId || "";
-        chat.textContent = "Чат";
-      }
-      btn.textContent = "Отклик отправлен";
-      btn.disabled = true;
-    });
-  });
-
-  // Chat -> ensure chat exists then open
-  qsa(".btn-chat").forEach((btn) => {
-    btn.addEventListener("click", async (e) => {
-      const card = btn.closest(".card");
-      const projectId = card?.dataset.projectId;
-      let ownerId = btn.dataset.ownerId || card?.dataset.ownerId;
-      if (ownerId && currentUserId && ownerId === currentUserId) {
-        e.preventDefault();
-        return;
-      }
-      if (!projectId) return;
-      e.preventDefault();
-      if (!ownerId) {
-        // подтянуть владельца проекта через API, если не передан в разметке
-        try {
-          const resProj = await fetch(`/api/projects/${projectId}/`, { credentials: "include" });
-          if (resProj.ok) {
-            const proj = await resProj.json();
-            ownerId = proj.owner || proj.owner_id;
-          }
-        } catch (_) {}
-      }
-      if (!ownerId) {
-        alert("У проекта нет владельца, чат недоступен.");
-        return;
-      }
-      const token = localStorage.getItem("access_token");
-      try {
-        const res = await fetch("/api/chats/", {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            "X-CSRFToken": getCookie("csrftoken"),
-            ...(token ? { Authorization: `Bearer ${token}` } : {}),
-          },
-          credentials: "include",
-          body: JSON.stringify({ participant_id: ownerId, project: projectId }),
-        });
-        const data = await res.json();
-        if (!res.ok) throw new Error(data?.detail || "chat_create_failed");
-        const chatId = data?.id;
-        window.location.href = chatId
-          ? `/messages/?chat=${chatId}`
-          : `/messages/?project=${projectId}`;
-      } catch (err) {
-        alert("Не удалось создать чат. У проекта должен быть владелец и вы должны быть авторизованы.");
-        window.location.href = `/messages/?project=${projectId}`;
-      }
-    });
-  });
+  initProjectChatButtons();
+  initFreelancerChatButtons();
 
   // search/filter controls
   qs("#do-search")?.addEventListener("click", () => {

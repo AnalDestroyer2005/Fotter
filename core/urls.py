@@ -24,7 +24,6 @@ urlpatterns = [
     path("api/", include("projects.api_urls")),
     path("api/", include("taxonomy.api_urls")),
     path("api/", include("messaging.api_urls")),
-
     # JWT
     path("api/register/", RegisterView.as_view(), name="register"),
     path("api/login/", LoginView.as_view(), name="login"),

@@ -26,6 +26,7 @@ INSTALLED_APPS = [
     "django.contrib.staticfiles",
     "channels",
     "pages",
+    "messaging",
     "drf_spectacular",
     "drf_spectacular_sidecar",
     # внешние
@@ -35,7 +36,6 @@ INSTALLED_APPS = [
     # твои приложения
     "accounts",
     "projects",
-    "messaging",
 
     "django.contrib.postgres",
     "common",
